@@ -1,0 +1,11 @@
+
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+info.txt
+notizen.txt
+# yeah. live is hard.
+*.cmd
+!postbuild.cmd
