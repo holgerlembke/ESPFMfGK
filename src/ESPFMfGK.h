@@ -97,21 +97,22 @@ typedef uint32_t (*ESPxWebCallbackFlags_t)(fs::FS &fs, String filename);
 class ESPFMfGK
 {
 public:
-  // HTML-Panel Features
-  const static uint8_t HasTree = 1 << 0;
-  const static uint8_t HasPreview = 1 << 1;
-
   // Flags, sync with fm.js, this has some room to grow, 32 bits ought to be enough for anybody
   const static uint32_t flagCanDelete = 1 << 0;
   const static uint32_t flagCanRename = 1 << 1;
   // see CanUpload, Edits "save" button will fail if not set
   const static uint32_t flagCanEdit = 1 << 2;
-  const static uint32_t flagCanPreview = 1 << 3;
+  // Allowed to be previewed. Browser does the preview, so it depends on that.
+  const static uint32_t flagAllowPreview = 1 << 3;
   const static uint32_t flagCanGZip = 1 << 4;
   const static uint32_t flagCanDownload = 1 << 5;
   const static uint32_t flagAllowInZip = 1 << 6;
   // A file with this name can be uploaded. An upload wont work if this flag is not set!
   const static uint32_t flagCanUpload = 1 << 7;
+  // File will not be shown at all
+  const static uint32_t flagIsNotVisible = 1 << 8;
+  // to be implemented
+  const static uint32_t flagCanPreview = 1 << 9;
 
   ESPxWebCallbackFlags_t checkFileFlags = NULL;
   ESPxWebCallbackURL_t checkURLs = NULL;
@@ -204,6 +205,8 @@ public:
   // additional html inserted into the foot below the web page
   String ExtraHTMLfoot = "";
   String WebPageTitle = "";
+  // set "accept-charset=\"utf-8\"" for utf-8 support in textarea
+  String textareaCharset = "";
 };
 
 #endif

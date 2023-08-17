@@ -432,9 +432,9 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
   {
     if (foldername != "/")
     {
-      fileManager->sendContent("-1:..:"+Folder1LevelUp(foldername));
+      fileManager->sendContent("-1:..:" + Folder1LevelUp(foldername));
       fileManager->sendContent(itemtrenner); // 0
-      fileManager->sendContent("-2:"+foldername);
+      fileManager->sendContent("-2:" + foldername);
       fileManager->sendContent(itemtrenner); // 1
     }
     recurseFolderList(foldername, -1, 0);
@@ -469,7 +469,7 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
       if (!((fsinfo[fsi].filesystem == &SD) &&
             (String(file.path()).startsWith(svi))))
       {
-        uint32_t flags = 0;
+        uint32_t flags = ~0;
         if (checkFileFlags != NULL)
         {
           flags = checkFileFlags(*fsinfo[fsi].filesystem, file.name());
@@ -478,19 +478,22 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
         {
           flags &= (~ESPFMfGK::flagCanGZip);
         }
+        
+        if (!(flags & ESPFMfGK::flagIsNotVisible))
+        {
+          fileManager->sendContent(String(file.path()));                   // .path() ist fqfn, .name() nur fn?
+          fileManager->sendContent(itemtrenner);                           // 0
+          fileManager->sendContent(DeUmlautFilename(String(file.path()))); // Display Name
+          fileManager->sendContent(itemtrenner);                           // 1
+          fileManager->sendContent(dispFileString(file.size(), false));
+          fileManager->sendContent(itemtrenner); // 2
+          fileManager->sendContent(colorline(linecounter));
+          fileManager->sendContent(itemtrenner); // 3
+          fileManager->sendContent(String(flags));
+          fileManager->sendContent(itemtrenner); // 4
 
-        fileManager->sendContent(String(file.path()));                   // .path() ist fqfn, .name() nur fn?
-        fileManager->sendContent(itemtrenner);                           // 0
-        fileManager->sendContent(DeUmlautFilename(String(file.path()))); // Display Name
-        fileManager->sendContent(itemtrenner);                           // 1
-        fileManager->sendContent(dispFileString(file.size(), false));
-        fileManager->sendContent(itemtrenner); // 2
-        fileManager->sendContent(colorline(linecounter));
-        fileManager->sendContent(itemtrenner); // 3
-        fileManager->sendContent(String(flags));
-        fileManager->sendContent(itemtrenner); // 4
-
-        linecounter++;
+          linecounter++;
+        }
       }
     }
     file = root.openNextFile();
@@ -580,7 +583,7 @@ void ESPFMfGK::fileManagerFileListInsert(void)
     fileManager->sendContent(F(" checked "));
   }
   fileManager->sendContent(F("/>"));
-  fileManager->sendContent(F("<label for=\"treeview\">Treeview</label>"));
+  fileManager->sendContent(F("<label for=\"treeview\">Folders</label>"));
 
   // The End.
   fileManager->sendContent("");
@@ -770,7 +773,9 @@ void ESPFMfGK::fileManagerFileEditorInsert(String &filename)
   fileManager->setContentLength(CONTENT_LENGTH_UNKNOWN);
   fileManager->send(200, F("text/html"), String());
 
-  fileManager->sendContent(ESPFMfGKWpFormIntro);
+  fileManager->sendContent(ESPFMfGKWpFormIntro1);
+  fileManager->sendContent(textareaCharset);
+  fileManager->sendContent(ESPFMfGKWpFormIntro2);
 
   if (fsinfo[getFileSystemIndex()].filesystem->exists(filename))
   {

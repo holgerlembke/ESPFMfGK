@@ -2,9 +2,12 @@
 #ifndef ESPFMfGKWpF2_h
 #define ESPFMfGKWpF2_h
 
-static const char ESPFMfGKWpFormIntro[] PROGMEM = 
-R"==x==(<form><textarea id="tect" rows="25" cols="80">)==x==";
+// !! hat fehlenden > am Ende, weil noch Charset eingefügt wird
+static const char ESPFMfGKWpFormIntro1[] PROGMEM =  
+R"==x==(<form )==x==";
 
+static const char ESPFMfGKWpFormIntro2[] PROGMEM =  
+R"==x==(><textarea id="tect" rows="25" cols="80">)==x==";
 
 static const char ESPFMfGKWpFormExtro1[] PROGMEM = 
 R"==x==(</textarea></form><button class="ed" title="Save file" onclick="sved(')==x==";
