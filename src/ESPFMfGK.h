@@ -2,9 +2,12 @@
 #ifndef ESPFMfGK_h
 #define ESPFMfGK_h
 
-// ESP32 File Manager for Generation Klick ESPFMfGK
-
 /*alt-shift-f
+
+  ESP32 File Manager for Generation Klick ESPFMfGK
+    https://github.com/holgerlembke/ESPFMfGK
+    lembke@gmail.com
+
   neue features: preview panel
 
   ++ alles mit fs:SD testen
@@ -24,6 +27,7 @@
      + das Konzept für beliebige Dateisysteme steht
      + nur noch Support für ESP32-Familie
      + Neuer Name: ESP32 File Manager for Generation Klick aka ESPFMfGK
+     + Pffff. Geht gut. Alles überarbeiten. Entchaosieren.
 
     V1.5
      x starting rework for version 2.0
