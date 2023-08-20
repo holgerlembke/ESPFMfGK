@@ -4,7 +4,7 @@
 
 div {
   margin: 1px;
-  padding: 0px;
+  padding: 0;
   font-family: 'Segoe UI', Verdana, sans-serif;
 }
 
@@ -22,11 +22,21 @@ div {
   visibility: collapse;
 }
 
+#ca, #ta, #ti, #pi, #fi {
+  margin: 0;
+  padding: 0;
+}
+
 #ca {}
 
-#ti, #fi {
-  display: block;
+#ti {
   float: left;
+}
+
+#fi {}
+
+#ei {
+  visibility: collapse;
 }
 
 .o1 {
@@ -175,16 +185,6 @@ div {
   color: white;
 }
 
-.cc {
-  width: min-content;
-  margin: 10px 0px;
-
-  display: grid;
-  grid-auto-rows: 1fr;
-  grid-template-columns: 1fr 1fr;
-  gap: 0px 0px;
-}
-
 .gc div {
   padding: 1px;
 }
@@ -232,7 +232,7 @@ div {
 
 .fnecc {
   width: min-content;
-  margin: 10px 0px;
+  margin: 0;
 
   display: grid;
   grid-auto-rows: 1fr;
@@ -241,6 +241,7 @@ div {
 }
 
 .fnegc {
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(1, max-content);
 }
@@ -261,14 +262,14 @@ div {
 }
 
 .fnesl {
-  border: 1px solid #FF9900;
-  background-color: #FF9900;
+  border: 1px solid #EDC315;
+  background-color: #EDC315;
   color: black;
 }
 
 .fnesl:hover {
-  border: 1px solid #FF9900;
-  background-color: #FF9900;
+  border: 1px solid #EDC315;
+  background-color: #EDC315;
   color: white;
 }
 
@@ -277,3 +278,119 @@ div {
   background-color: #F8FBDB;
   color: #white;
 }
+
+/* back button */
+.fneba {
+  background-color: #EDC315;
+  border: 3px solid #EDC315;
+  border-radius: 4px;
+  padding: 0px 5px 0px 5px;
+  margin: 0;
+  font-size: 0.7em;
+  cursor: pointer;
+}
+
+.fneba:hover {
+  color: white;
+  background-color: #9999FF;
+  border: 3px solid #9999FF;
+  border-radius: 4px;
+}
+
+/* Editor window */
+#tect {
+  width:90%; 
+  height:90%;
+}
+
+#ei button {
+  white-space: nowrap; 
+  background-color: #F8FBDB;
+  border: 3px solid #F8FBDB;
+  border-radius: 4px;
+  padding: 5px 3px 5px 3px;
+  margin-bottom: 0.7em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#ei button:hover {
+  background-color: #9999FF;
+  border-radius: 4px;
+  border: 3px solid #F8FBDB;
+  color: white;
+}
+
+
+/* pfad tabelle */
+#pl {
+  display: inline-grid; 
+  grid-template-columns: auto 20px 40px 1fr 40px 20px auto; 
+  grid-template-rows: auto auto; 
+  gap: 0px 0px; 
+}
+
+#pl div {
+  margin: 0;
+  padding: 0;
+}
+
+#pl .pu1 {
+  width: 1em;
+  border-radius: 0 0 0 1em;
+  background-color: #FF9966;
+  height: 100%;
+}
+
+#pl .pu7 {
+  width: 1em;
+  border-radius: 0 0 1em 0;
+  background-color: #FF9966;
+  height: 100%;
+}
+
+#pl .po2, #pl .po6 {
+  background-color: #FF9966;
+}
+#pl .po2 div {
+  width: 1em;
+  border-radius: 0 0 0 0.7em;
+  background-color: white;
+  height: 100%;
+  width: 100%;
+}
+
+#pl .po6 div {
+  width: 1em;
+  border-radius: 0 0 0.7em 0;
+  background-color: white;
+  height: 100%;
+  width: 100%;
+}
+
+#pl .po1, #pl .po7, #pl .pu2, #pl .pu6  {
+  background-color: #FF9966;
+}
+#pl .pu3, #pl .pu5  {
+  background-color: #CC6666;
+}
+#pl .pu4  {
+  background-color: #FFCC99;
+  font-size: 0.7em;
+}
+#pl .po4  {
+  text-align: center;
+  height: 1.7em;
+}
+
+#pl .po4 > div {
+  margin-top: 0.1em;
+}
+
+
+
+
+
+
+
+

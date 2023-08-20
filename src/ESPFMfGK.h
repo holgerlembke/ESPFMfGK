@@ -16,9 +16,6 @@
 
   ### ggf. braucht es eine dateinamen-codierung -> webseite, um alle spezialfälle sauber zu transportieren
 
-  fehler:
-  -- wenn #define fileManagerServerStaticsInternally nicht definiert und fs leer: ungute fehlermeldung
-
   getrennten eintrag für das fs, wo die webseiten liegen
 
   Changes
@@ -28,6 +25,7 @@
      + nur noch Support für ESP32-Familie
      + Neuer Name: ESP32 File Manager for Generation Klick aka ESPFMfGK
      + Pffff. Geht gut. Alles überarbeiten. Entchaosieren.
+     + charset-support, utf-8 scheint zu funktionieren
 
     V1.5
      x starting rework for version 2.0
@@ -78,10 +76,14 @@
 #include <WebServer.h>
 #include <FS.h>
 
-/* undefine this to save about 10k code space.
-   it requires to put the files from "<library>/filemanager" into the LittleFS. No free lunch.
+/* Undefine this to save about 10k code space.
+     Now you have to put the files from "<library>/filemanager" into a FS.
+     The FS is indexed by FileSystemIndexForWebPages and follows the order used by AddFS().
+     So by default the /fm.* are put on the first added FS, that one, that is shown in the browser by default as the first FS.
+     You can use the callback to hide the /fm.* files, isFileManagerInternalFile(String fn) helps with that.
 */
 // #define fileManagerServerStaticsInternally
+
 
 // Callback for "foreign" URLs called to web server. If not set, all files will be served
 //  Result:
@@ -91,7 +93,7 @@
 // Main usage of this callback is to implement hyperlinks in in additional html content added via ExtraHTML*
 typedef int (*ESPxWebCallbackURL_t)(String &data);
 
-// Callback for checking file flags.
+// Callback for checking file flags. Please look into the examples.
 typedef uint32_t (*ESPxWebCallbackFlags_t)(fs::FS &fs, String filename);
 
 class ESPFMfGK
@@ -111,8 +113,6 @@ public:
   const static uint32_t flagCanUpload = 1 << 7;
   // File will not be shown at all
   const static uint32_t flagIsNotVisible = 1 << 8;
-  // to be implemented
-  const static uint32_t flagCanPreview = 1 << 9;
 
   ESPxWebCallbackFlags_t checkFileFlags = NULL;
   ESPxWebCallbackURL_t checkURLs = NULL;
@@ -161,7 +161,7 @@ private:
   void fileManagerBootinfo(void);
   void fileManagerFileEditorInsert(String &filename);
   void fileManagerDownload(String &filename);
-  void servefile(String uri);
+  void servefile(String uri, int overridefs = -1);
   void Illegal404();
 
   // Zip-File uncompressed/stored
@@ -199,6 +199,10 @@ public:
   virtual void handleClient();
 
   bool AddFS(fs::FS &fs, String FSname, bool AutoTreemode);
+
+  // by default, ESPFMfGK will look for the /fm.* stuff at this file system
+  int FileSystemIndexForWebPages = 0;
+  bool isFileManagerInternalFile(String fn);
 
   // must be a valid css color name, see https://en.wikipedia.org/wiki/Web_colors
   String BackgroundColor = "";

@@ -108,7 +108,7 @@ void ESPFMfGK::handleClient()
 // privates start here
 //*****************************************************************************************************
 //*****************************************************************************************************
-void ESPFMfGK::servefile(String uri)
+void ESPFMfGK::servefile(String uri, int overridefs)
 {
   // Handle the servinf of the "fm.*"-files
   int fsi = getFileSystemIndex(false);
@@ -120,7 +120,6 @@ void ESPFMfGK::servefile(String uri)
   Serial.print(F("File system id: "));
   Serial.println(fsi);
   /**/
-  ;
 
   String contentTyp = getContentType(uri);
 
@@ -144,18 +143,42 @@ void ESPFMfGK::servefile(String uri)
 
 //*****************************************************************************************************
 //*****************************************************************************************************
+bool ESPFMfGK::isFileManagerInternalFile(String fn)
+{
+  fn.toLowerCase();
+  if ((fn == "/fm.html") || (fn == "/fm.css") || (fn == "/fm.js"))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+//*****************************************************************************************************
+//*****************************************************************************************************
 void ESPFMfGK::fileManagerNotFound(void)
 {
   String uri = fileManager->uri();
 
 #ifndef fileManagerServerStaticsInternally
-  if ((uri == "/") || (uri == "/fm.html") || (uri == "/fm.css") || (uri == "/fm.js"))
+  if (uri == "/")
   {
-    if (uri == "/")
+    uri = "/fm.html";
+  }
+  if (isFileManagerInternalFile(uri))
+  {
+    // limits
+    if (FileSystemIndexForWebPages < 0)
     {
-      uri = "/fm.html";
+      FileSystemIndexForWebPages = 0;
     }
-    servefile(uri);
+    else if (FileSystemIndexForWebPages > maxfilesystem - 1)
+    {
+      FileSystemIndexForWebPages = maxfilesystem - 1;
+    }
+    servefile(uri, FileSystemIndexForWebPages);
     return;
   }
 #endif
@@ -375,12 +398,22 @@ void ESPFMfGK::recurseFolderList(String foldername, int maxtiefe, int tiefe)
     {
       if (!(String(file.path()).startsWith(svi)))
       {
+        /** /
         Serial.print("Pfad: ");
         Serial.println(String(file.path()));
         Serial.print("Name: ");
         Serial.println(String(file.name()));
-        fileManager->sendContent(String(tiefe) + ":" + DeUmlautFilename(String(file.path())));
-        fileManager->sendContent(itemtrenner); // 0
+        /**/
+        uint32_t flags = ~0;
+        if (checkFileFlags != NULL)
+        {
+          flags = checkFileFlags(*fsinfo[fsi].filesystem, String(file.path()) + "/");
+        }
+        if (!(flags & ESPFMfGK::flagIsNotVisible))
+        {
+          fileManager->sendContent(String(tiefe) + ":" + DeUmlautFilename(String(file.path())));
+          fileManager->sendContent(itemtrenner); // 0
+        }
       }
       if (tiefe < maxtiefe)
       {
@@ -478,7 +511,7 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
         {
           flags &= (~ESPFMfGK::flagCanGZip);
         }
-        
+
         if (!(flags & ESPFMfGK::flagIsNotVisible))
         {
           fileManager->sendContent(String(file.path()));                   // .path() ist fqfn, .name() nur fn?
@@ -522,7 +555,7 @@ void ESPFMfGK::fileManagerFileListInsert(void)
     path = "/";
   }
 
-  /**/
+  /** /
   Serial.print("fsi: ");
   Serial.print(fsi);
   Serial.print(" sit: ");
