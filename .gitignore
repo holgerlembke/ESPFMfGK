@@ -8,4 +8,5 @@ info.txt
 notizen.txt
 # yeah. live is hard.
 *.cmd
+.vscode
 !postbuild.cmd
