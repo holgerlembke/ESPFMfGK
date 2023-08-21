@@ -7,11 +7,11 @@ Ongoing work
 
 # File menu functions
 
-## Delete
+### Delete
 
 Just what it says: it deletes the file. Currently no way to delete folders, but they are not shown if empty.
 
-## Rename/Move
+### Rename/Move
 
 This will move a file from one location to another. It creates the target folder. It works across devices.
 
@@ -22,11 +22,11 @@ File name syntax can be:
 
 Deviceindex follows the order of ESPFMfGK::AddFS calls, 0...n-1.
 
-## Edit
+### Edit
 
 Lets edit a file! Works well for everything that is editable.
 
-## Preview
+### Preview
 
 Opens a preview window for the file. It depends on what the browser can display, so everything editable and JPEG/PNG files should work. The windows existance is disconnected from the files existance, it is a snapshot.
 
