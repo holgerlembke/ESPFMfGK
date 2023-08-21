@@ -35,8 +35,8 @@ div {
 
 #fi {}
 
-#ei {
-  visibility: collapse;
+#ei, #pv {
+  display: none;
 }
 
 .o1 {
@@ -387,10 +387,62 @@ div {
   margin-top: 0.1em;
 }
 
+/* Windows */
+.windowstyle {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    z-index: 9;
+    background-color: #f1f1f1;
+}
 
+.windowcontent {
+    overflow:scroll;
+    overflow-x:hidden;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid #D8A570;
+}
 
+.windowtitle {
+    display: grid; 
+    margin: 0;
+    grid-auto-rows: 1fr; 
+    grid-template-columns: 1fr 20px; 
+    gap: 0px 0px; 
+}    
+ 
+.windowtitle .t {
+    padding-right: 10px;
+    padding-left: 10px;
+    margin:0 2px 0 0;
+    cursor: move;
+    z-index: 12;
+    background-color: #D8A570;
+    border-top-left-radius: 10px;
+    color: #fff;
+}
 
+.windowclose {
+    cursor: default;
+    padding: 0;
+    margin: 0;
+    font-size: 0.1em;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color: #B67CD0;
+}
 
-
-
+.windowgrip {
+    z-index: 12;
+    margin: 0;
+    padding: 0;
+    float: right;
+    position: absolute;
+    bottom: 0;
+    right: 10px;
+    width: 1em;
+    cursor: nwse-resize;
+}
 

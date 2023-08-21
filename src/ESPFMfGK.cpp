@@ -108,7 +108,7 @@ void ESPFMfGK::handleClient()
 // privates start here
 //*****************************************************************************************************
 //*****************************************************************************************************
-void ESPFMfGK::servefile(String uri, int overridefs)
+void ESPFMfGK::servefile(String uri)
 {
   // Handle the servinf of the "fm.*"-files
   int fsi = getFileSystemIndex(false);
@@ -178,7 +178,7 @@ void ESPFMfGK::fileManagerNotFound(void)
     {
       FileSystemIndexForWebPages = maxfilesystem - 1;
     }
-    servefile(uri, FileSystemIndexForWebPages);
+    servefile(uri);
     return;
   }
 #endif
@@ -407,7 +407,7 @@ void ESPFMfGK::recurseFolderList(String foldername, int maxtiefe, int tiefe)
         uint32_t flags = ~0;
         if (checkFileFlags != NULL)
         {
-          flags = checkFileFlags(*fsinfo[fsi].filesystem, String(file.path()) + "/");
+          flags = checkFileFlags(*fsinfo[fsi].filesystem, String(file.path()) + "/", 0);
         }
         if (!(flags & ESPFMfGK::flagIsNotVisible))
         {
@@ -505,7 +505,7 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
         uint32_t flags = ~0;
         if (checkFileFlags != NULL)
         {
-          flags = checkFileFlags(*fsinfo[fsi].filesystem, file.name());
+          flags = checkFileFlags(*fsinfo[fsi].filesystem, file.name(), 0);
         }
         if (!gzipperexists)
         {
@@ -577,10 +577,17 @@ void ESPFMfGK::fileManagerFileListInsert(void)
   recurseFolder(path, !sit, maxtiefe, true, linecounter);
   fileManager->sendContent(antworttrenner);
 
-  String sinfo = "&nbsp; Size: " +
-                 dispFileString(totalBytes(fsinfo[fsi].filesystem), true) +
-                 ", used: " +
-                 dispFileString(usedBytes(fsinfo[fsi].filesystem), true);
+  String sinfo = "<span title=\"";
+
+  for (uint8_t i = 0; i < maxfilesystem; i++)
+  {
+    sinfo += "FS " + String(i) + ": " + fsinfo[i].fsname + "\n";
+  }
+  sinfo += "\">&nbsp; Size: " +
+           dispFileString(totalBytes(fsinfo[fsi].filesystem), true) +
+           ", used: " +
+           dispFileString(usedBytes(fsinfo[fsi].filesystem), true) +
+           "</span>";
   /*
     fileManager->sendContent(F(" FS blocksize: "));
     fileManager->sendContent(String(info.blockSize));
@@ -692,8 +699,8 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
   int fsi = getFileSystemIndex();
 
   if (fsinfo[fsi].filesystem->exists(fn))
-  { // file exists?
-    if (checkFileFlags(*fsinfo[fsi].filesystem, fn) & flag == 0)
+  { // file exists!
+    if (checkFileFlags(*fsinfo[fsi].filesystem, fn, flagIsValidAction | flag) & flag == 0)
     {
       return "";
     }
@@ -703,6 +710,136 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
   }
 
   return "";
+}
+
+//*****************************************************************************************************
+String ESPFMfGK::pathname(String fn)
+{
+  // find last "/"
+  int i = fn.lastIndexOf("/");
+
+  if (i > -1)
+  {
+    // Serial.println(fn.substring(0, i));
+    return fn.substring(0, i);
+  }
+  else
+  {
+    return "/";
+  }
+}
+
+//*****************************************************************************************************
+int ESPFMfGK::getFSidxfromFilename(String fn)
+{
+  int i = fn.indexOf(":");
+  if (i > -1)
+  {
+    fn = fn.substring(0, i - 1);
+    int fnidx = fn.toInt();
+    // Limits
+    if ((fnidx<0) || (fnidx>=maxfilesystem)) {
+      return -1;
+    } else {
+      return fnidx;
+    }
+  }
+  else
+  {
+    return -1;
+  }
+}
+
+//*****************************************************************************************************
+String ESPFMfGK::getCleanFilename(String fn)
+{
+  int i = fn.indexOf(":");
+  if (i > -1)
+  {
+    return fn.substring(i + 1, fn.length() - 2);
+  }
+  else
+  {
+    return fn;
+  }
+}
+
+//*****************************************************************************************************
+bool ESPFMfGK::CopyMoveFile(String oldfilename, String newfilename, bool move)
+{
+  // Zusammensuchen der FilesystemIndizes
+  int fsiofn = getFSidxfromFilename(oldfilename);
+  int fsinfn = getFSidxfromFilename(newfilename);
+
+  if (fsiofn == -1)
+  {
+    fsiofn = getFileSystemIndex();
+  }
+  if (fsinfn == -1)
+  {
+    fsinfn = fsiofn;
+  }
+
+  // Aufräumen der Dateinamen
+  oldfilename = getCleanFilename(oldfilename);
+  newfilename = getCleanFilename(newfilename);
+
+  // Neuen Ordner bauen, vorsichtshalber. Stückweise.
+  int i = 1;
+  String pn = pathname(newfilename);
+  while (i < pn.length())
+  {
+    if (pn.charAt(i) == '/')
+    {
+      fsinfo[fsinfn].filesystem->mkdir(pn.substring(0, i));
+    }
+    i++;
+  }
+  fsinfo[fsinfn].filesystem->mkdir(pn);
+
+  File oldfile = fsinfo[fsiofn].filesystem->open(oldfilename, FILE_READ);
+  File newfile = fsinfo[fsinfn].filesystem->open(newfilename, FILE_WRITE);
+
+  if ((oldfile) && (newfile))
+  {
+    const int bufsize = 4 * 1024;
+    uint8_t *buffer;
+    buffer = new uint8_t[4 * 1024];
+
+    int bytesread = 0;
+    int byteswritten = 0;
+    while (oldfile.available())
+    {
+      size_t r = oldfile.read(buffer, bufsize);
+      bytesread += r;
+      byteswritten += newfile.write(buffer, r);
+    }
+
+    delete[] buffer;
+
+    oldfile.close();
+    newfile.close();
+
+    // remove only, if new file is fully written.
+    if ((move) && (bytesread == byteswritten))
+    {
+      fsinfo[fsiofn].filesystem->remove(oldfilename);
+    }
+
+    return true;
+  }
+  else
+  {
+    if (oldfile)
+    {
+      Serial.println(F("CMF: newfile fail."));
+    }
+    else
+    {
+      Serial.println(F("CMF: oldfile fail."));
+    }
+    return false;
+  }
 }
 
 //*****************************************************************************************************
@@ -739,6 +876,7 @@ void ESPFMfGK::fileManagerJobber(void)
       /**/
       Serial.print("Rename: ");
       Serial.print(fn);
+      Serial.print(" new: ");
       Serial.print(newfn);
       Serial.println();
       /**/
@@ -747,7 +885,32 @@ void ESPFMfGK::fileManagerJobber(void)
         Illegal404();
         return;
       }
-      fsinfo[getFileSystemIndex()].filesystem->rename(fn, newfn);
+      if (!newfn.startsWith("/"))
+      {
+        newfn = "/" + newfn;
+      }
+      int fsi = getFileSystemIndex();
+
+      if (checkFileFlags(*fsinfo[fsi].filesystem, newfn, flagCanRename | flagIsValidTargetFilename) & flagCanRename == 0)
+      {
+        Illegal404();
+        return;
+      }
+
+      if (pathname(fn) == pathname(newfn))
+      {
+        if (!fsinfo[fsi].filesystem->rename(fn, newfn))
+        {
+          Serial.println(F("Rename failed (1)."));
+        }
+      }
+      else
+      {
+        if (!CopyMoveFile(fn, newfn, true))
+        {
+          Serial.println(F("Rename failed (2)."));
+        }
+      }
       // dummy answer
       fileManager->send(200, "text/plain", "");
       // Raus.
@@ -769,11 +932,11 @@ void ESPFMfGK::fileManagerJobber(void)
       fileManagerFileEditorInsert(fn);
       return; //<<==========================
     }
-    else if (jobname == "download")
+    else if ((jobname == "download") || (jobname == "preview"))
     {
       String fn = getFileNameFromParam(flagCanDownload);
       /**/
-      Serial.print("Download: ");
+      Serial.print(F("Download: "));
       Serial.print(fn);
       Serial.println();
       /**/
@@ -782,7 +945,14 @@ void ESPFMfGK::fileManagerJobber(void)
         Illegal404();
         return;
       }
-      fileManagerDownload(fn);
+      if (jobname == "download")
+      {
+        fileManagerDownload(fn);
+      }
+      else
+      {
+        servefile(fn);
+      }
       return; //<<==========================
     }
   }
@@ -794,6 +964,7 @@ void ESPFMfGK::fileManagerJobber(void)
 //*****************************************************************************************************
 void ESPFMfGK::Illegal404()
 {
+  Serial.println(F("FileManager: send 404."));
   // in case all fail, ends here
   fileManager->send(404, F("text/plain"), F("Illegal."));
 }
@@ -923,7 +1094,7 @@ void ESPFMfGK::fileManagerReceiver(void)
     // cut length
     fn = CheckFileNameLengthLimit(fn);
 
-    if (checkFileFlags(*fsinfo[fsi].filesystem, fn) & flagCanUpload == 0)
+    if (checkFileFlags(*fsinfo[fsi].filesystem, fn, flagCanUpload | flagIsValidTargetFilename) & flagCanUpload == 0)
     {
       return;
     }

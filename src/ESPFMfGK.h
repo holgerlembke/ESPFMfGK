@@ -2,21 +2,10 @@
 #ifndef ESPFMfGK_h
 #define ESPFMfGK_h
 
-/*alt-shift-f
-
-  ESP32 File Manager for Generation Klick ESPFMfGK
+/*
+  ESP32 File Manager for Generation Klick aka ESPFMfGK
     https://github.com/holgerlembke/ESPFMfGK
     lembke@gmail.com
-
-  neue features: preview panel
-
-  ++ alles mit fs:SD testen
-  ++ gzipper testen
-  ++ copy file from one fs to another fs/another folder
-
-  ### ggf. braucht es eine dateinamen-codierung -> webseite, um alle spezialfälle sauber zu transportieren
-
-  getrennten eintrag für das fs, wo die webseiten liegen
 
   Changes
     V1.6
@@ -26,6 +15,8 @@
      + Neuer Name: ESP32 File Manager for Generation Klick aka ESPFMfGK
      + Pffff. Geht gut. Alles überarbeiten. Entchaosieren.
      + charset-support, utf-8 scheint zu funktionieren
+     + Preview. Yeah.
+     + Rename works across folder structures (ok, it is copy+delete)
 
     V1.5
      x starting rework for version 2.0
@@ -94,7 +85,7 @@
 typedef int (*ESPxWebCallbackURL_t)(String &data);
 
 // Callback for checking file flags. Please look into the examples.
-typedef uint32_t (*ESPxWebCallbackFlags_t)(fs::FS &fs, String filename);
+typedef uint32_t (*ESPxWebCallbackFlags_t)(fs::FS &fs, String filename, uint32_t flags);
 
 class ESPFMfGK
 {
@@ -113,6 +104,10 @@ public:
   const static uint32_t flagCanUpload = 1 << 7;
   // File will not be shown at all
   const static uint32_t flagIsNotVisible = 1 << 8;
+  // beim Umbenennen
+  const static uint32_t flagIsValidTargetFilename =  1 << 9;
+  // beim Überprüfen, ob eine Dateisystem-Aktion zulässig ist
+  const static uint32_t flagIsValidAction =  1 << 10;
 
   ESPxWebCallbackFlags_t checkFileFlags = NULL;
   ESPxWebCallbackURL_t checkURLs = NULL;
@@ -161,7 +156,7 @@ private:
   void fileManagerBootinfo(void);
   void fileManagerFileEditorInsert(String &filename);
   void fileManagerDownload(String &filename);
-  void servefile(String uri, int overridefs = -1);
+  void servefile(String uri);
   void Illegal404();
 
   // Zip-File uncompressed/stored
@@ -177,6 +172,12 @@ private:
   bool ShowInTreeView();
   String CurrentPath();
 
+  // Dateinamen mit dem Format IDX:/path/path/fn
+  int getFSidxfromFilename(String fn);   // -> IDX bzw. -1
+  String getCleanFilename(String fn);    // -> immer /path/path/fn
+
+  String pathname(String fn);
+  bool CopyMoveFile(String oldfilename, String newfilename, bool move);
   String DeUmlautFilename(String fn);
   // total/used are not exposed in FS::FS. Who knows why.
   uint64_t totalBytes(fs::FS *fs);

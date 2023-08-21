@@ -3,6 +3,7 @@ var elemento3 = null;
 var elementmsg = null;
 var elementfi = null;
 var elementei = null;
+var elementpv = null;
 var elementti = null;
 var elementpi = null;
 var elementws = null;
@@ -12,6 +13,7 @@ var antworttrenner = String.fromCharCode(2, 1, 3);
 var itemtrenner = String.fromCharCode(2, 1, 4);
 
 var foldername = "";
+var windowcounter = 0;
 
 var pathinsertintro =
     "<div id=\"pl\"><div class=\"po1\"></div><div class=\"po2\"><div></div></div><div class=\"po3\"></div><div class=\"po4\"><div>";
@@ -20,6 +22,10 @@ var pathinsertextro =
     "</div></div><div class=\"po5\"></div><div class=\"po6\"><div></div></div><div class=\"po7\"></div>" +
     "<div class=\"pu1\"></div><div class=\"pu2\"></div><div class=\"pu3\"></div><div class=\"pu4\">&nbsp;</div>" +
     "<div class=\"pu5\"></div><div class=\"pu6\"></div><div class=\"pu7\"></div></div>";
+
+var windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div>"+
+"<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>"+
+"<div class=\"windowgrip\">:::</div></div>";
 
 //000000000000000000000000000
 function compressurlfile(source) {
@@ -115,6 +121,16 @@ function showfolder(level, folder) {
 }
 
 //000000000000000000000000000
+function progressfunc(evt) {
+    /*        
+          var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
+          if (lastpercentComplete != percentComplete) {
+            lastpercentComplete = percentComplete;
+    */
+    msgline("Fetching data: " + evt.loaded + "  B");
+}
+
+//000000000000000000000000000
 function getfileinsert() {
     var param = getFileSystemIndex();
     var cb = document.getElementById("treeview");
@@ -127,15 +143,7 @@ function getfileinsert() {
 
     msgline("Fetching files infos...");
     var request = new XMLHttpRequest();
-    request.onprogress = function (evt) {
-        /*        
-              var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
-              if (lastpercentComplete != percentComplete) {
-                lastpercentComplete = percentComplete;
-        */
-        msgline("Fetching files infos, " + evt.loaded + "  B received.");
-        // console.log('Info: '+evt.loaded);
-    }
+    request.onprogress = progressfunc;
     request.onreadystatechange = AnswerProcessor;
     request.open('GET', '/i?fs=' + param + '&t=' + wantstree + '&pn=' + foldername, true);
     request.send(null);
@@ -296,9 +304,7 @@ function AnswerProcessor() {
 function getbootinfo() {
     msgline("Get display infos...");
     var request = new XMLHttpRequest();
-    request.onprogress = function (evt) {
-        msgline("Fetching display infos, " + evt.loaded + "  B received.");
-    }
+    request.onprogress = progressfunc;
     request.onreadystatechange = BootAnswerProcessor;
     request.open('GET', '/b', true);
     request.send(null);
@@ -366,28 +372,86 @@ function renamefile(filename) {
     }
 }
 
-var editxhr;
+//000000000000000000000000000
+function previewfile(filename) {
+    msgline("Please wait. Creating preview...");
+
+    var previewxhr = new XMLHttpRequest();
+    previewxhr.responseType = "blob";
+    previewxhr.onreadystatechange = function () {
+        var DONE = this.DONE || 4;
+        if (this.readyState === DONE) {
+            var newwin = windowhtml;
+
+            var winid = "win"+windowcounter;
+            newwin = newwin.replaceAll("%i%", "win"+windowcounter);
+            newwin = newwin.replaceAll("%t%", filename);
+            var elem = document.createRange().createContextualFragment(newwin);
+            document.body.appendChild(elem);
+
+            // console.log(previewxhr.getResponseHeader('content-type'));
+            // alles furchtbar umständlich, weil bilder nur als BLOB funktionieren und Text daher wieder aus dem Blob gelesen werden muss... 
+
+            var content = document.querySelector("#"+winid+" .windowcontent");
+            var dragger = document.querySelector("#"+winid+" .windowtitle");
+            var winid = '#'+"win"+windowcounter;
+            var node = document.querySelector(winid);
+
+            if (previewxhr.getResponseHeader('content-type').startsWith("image/")) {
+              var image = new Image();
+              image.src = URL.createObjectURL(previewxhr.response);
+              content.appendChild(image);
+              makeDraggable(node);
+            } else {
+              content.style.whiteSpace = "pre";
+              const reader = new FileReader();
+              reader.addEventListener('loadend', (e) => {
+                content.textContent = e.srcElement.result;
+                // Warten, bis Content vollständig ASYNC!
+                makeDraggable(node);
+              });
+              reader.readAsText(previewxhr.response);
+            }             
+
+            windowcounter++;
+            msgline("");
+            waitspinner(false);
+        }
+    };
+    previewxhr.onprogress = progressfunc;
+    previewxhr.open('GET', "/job?fs=" + getFileSystemIndex() + "&job=preview&fn=" + filename, true);
+    previewxhr.send(null);
+    waitspinner(true);
+}
 
 //000000000000000000000000000
 function editfile(filename) {
     msgline("Please wait. Creating editor...");
     hidepathtree();
 
-    editxhr = new XMLHttpRequest();
+    var editxhr = new XMLHttpRequest();
     editxhr.onreadystatechange = function () {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             hidepathtree();
             elementfi.innerHTML = "";
             elementfi.style.visibility = "collapse";
-            elementei.innerHTML = editxhr.responseText;
-            elementei.style.visibility = "visible";
+            elementei.innerHTML = this.responseText;
+            elementei.style.display = "block";
             elemento3.innerHTML = "Edit " + filename;
+
+            var elem = document.getElementById("tect");
+            elem.style.height = "90%"; // window.innerHeight/2+"px";
+            elem.style.width = "90%"; // window.innerWidth/2+"px";
+
             msgline("");
+            waitspinner(false);
         }
     };
+    editxhr.onprogress = progressfunc;
     editxhr.open('GET', "/job?fs=" + getFileSystemIndex() + "&job=edit&fn=" + filename, true);
     editxhr.send(null);
+    waitspinner(true);
 }
 
 //000000000000000000000000000
@@ -418,11 +482,12 @@ function sved(filename) {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             elementei.innerHTML = "";
-            elementei.style.visibility = "collapse";
+            elementei.style.display = "none";
             elementfi.style.visibility = "visible";
             getfileinsert();
         }
     }
+    xhr.onprogress = progressfunc;
 
     xhr.send(body);
 }
@@ -430,7 +495,7 @@ function sved(filename) {
 //000000000000000000000000000
 function abed() {
     elementei.innerHTML = "";
-    elementei.style.visibility = "collapse";
+    elementei.style.display = "none";
     elementfi.style.visibility = "visible";
     getfileinsert();
 }
@@ -443,16 +508,7 @@ function uploadFile(file, islast) {
     uploaddone = false;
     var xhr = new XMLHttpRequest();
     lastpercentComplete = -1;
-    xhr.upload.onprogress = function (evt) {
-        if (evt.lengthComputable) {
-            var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
-            if (lastpercentComplete != percentComplete) {
-                lastpercentComplete = percentComplete;
-                msgline("Please wait. Upload progress " + percentComplete + "%");
-                // console.log('Progress: '+percentComplete);
-            }
-        }
-    }
+    xhr.upload.onprogress = progressfunc;
     xhr.onreadystatechange = function () {
         // console.log(xhr.status);
         var DONE = this.DONE || 4;
@@ -493,6 +549,7 @@ function uploadFileProzessor() {
 
 //000000000000000000000000000
 function dropHandler(ev) {
+    waitspinner(true);
     console.log('File(s) dropped');
 
     globaldropfilelisthlpr = ev.dataTransfer;
@@ -548,6 +605,113 @@ function downloadall() {
 }
 
 //000000000000000000000000000
+function makeDraggable(box) {
+    let cX = 0, cY = 0, pX = 0, pY = 0;
+
+    box.setAttribute("floater", "true");
+    box.classList.add("windowstyle");
+    let content = box.querySelector('.windowcontent');
+    if (content) {
+      if (content.clientHeight>window.innerHeight) {
+        content.style.height=window.innerHeight/2+"px";
+      }
+      if (content.clientWidth>window.innerWidth) {
+        content.style.width=window.innerWidth/2+"px";
+      }
+    }
+
+    let title = box.querySelector('.windowtitle');
+    if (title) {
+        title.addEventListener('mousedown', startDrag);
+    }
+    let resizer = box.querySelector('.windowgrip');
+    if (resizer) {
+        resizer.addEventListener('mousedown', startResize);
+    }
+    let closer = box.querySelector('.windowclose');
+    if (closer) {
+        closer.addEventListener('click', closewindow);
+    }
+    bringbox2front();
+
+    // Closing
+    function closewindow() {
+        closer.removeEventListener('click', closewindow);
+        resizer.removeEventListener('mousedown', startResize);
+        title.removeEventListener('mousedown', startDrag);
+        box.innerHTML = "";
+        box.style.display = "none";
+    }
+
+    // Stacking
+    function bringbox2front() {
+        let all = document.querySelectorAll('[floater]');
+        let maxz = -1;
+
+        for (var i = 0; i < all.length; i++) {
+            if (all[i] != box) {
+                let zi = parseInt(window.getComputedStyle(all[i]).zIndex);
+                if ((zi > maxz)) {
+                    maxz = zi;
+                }
+            }
+        }
+        if (window.getComputedStyle(box).zIndex <= maxz) {
+            box.style.zIndex = maxz + 1;
+        }
+    }
+
+    // Resizeing
+    function startDrag(e) {
+        bringbox2front();
+        e.preventDefault();
+        pX = e.clientX;
+        pY = e.clientY;
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('mousemove', drag);
+    }
+
+    function drag(e) {
+        e.preventDefault();
+        cX = pX - e.clientX;
+        cY = pY - e.clientY;
+        pX = e.clientX;
+        pY = e.clientY;
+        box.style.top = (box.offsetTop - cY) + 'px';
+        box.style.left = (box.offsetLeft - cX) + 'px';
+    }
+
+    function endDrag() {
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('mousemove', drag);
+    }
+
+    // Resize
+    function startResize(e) {
+        e.preventDefault();
+        pX = e.clientX;
+        pY = e.clientY;
+        document.addEventListener('mouseup', endResize);
+        document.addEventListener('mousemove', resize);
+    }
+
+    function resize(e) {
+        e.preventDefault();
+        box.style.width = e.pageX - box.getBoundingClientRect().left + 'px';
+        box.style.height = e.pageY - box.getBoundingClientRect().top + 'px';
+        if (content) {
+          content.style.width = e.pageX - content.getBoundingClientRect().left + 'px';
+          content.style.height = e.pageY - content.getBoundingClientRect().top + 'px';
+        }
+    }
+
+    function endResize() {
+        document.removeEventListener('mouseup', endResize);
+        document.removeEventListener('mousemove', resize);
+    }
+}
+
+//000000000000000000000000000
 function boot() {
     // Does lookup need time?  
     elemento2 = document.getElementById("o2");
@@ -555,6 +719,7 @@ function boot() {
     elementmsg = document.getElementById('msg');
     elementfi = document.getElementById("fi");
     elementei = document.getElementById("ei");
+    elementpv = document.getElementById("pv");
     elementti = document.getElementById("ti");
     elementpi = document.getElementById("pi");
     elementws = document.getElementById("wait");
