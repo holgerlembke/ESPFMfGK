@@ -1,4 +1,4 @@
-*.js linguist-language=C++
-*.html linguist-language=C++
-*.css linguist-language=C++
+*.js linguist-language=JavaScript
+*.html linguist-language=html
+*.css linguist-language=CascadingStyleSheets
 *.ino linguist-language=C++
