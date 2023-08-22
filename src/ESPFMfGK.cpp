@@ -738,9 +738,12 @@ int ESPFMfGK::getFSidxfromFilename(String fn)
     fn = fn.substring(0, i - 1);
     int fnidx = fn.toInt();
     // Limits
-    if ((fnidx<0) || (fnidx>=maxfilesystem)) {
+    if ((fnidx < 0) || (fnidx >= maxfilesystem))
+    {
       return -1;
-    } else {
+    }
+    else
+    {
       return fnidx;
     }
   }
@@ -953,6 +956,33 @@ void ESPFMfGK::fileManagerJobber(void)
       {
         servefile(fn);
       }
+      return; //<<==========================
+    }
+    else if (jobname == "createnew")
+    {
+      String fn = getFileNameFromParam(flagCanCreateNew);
+      // benötigt einen Filenamen-Fragment als Parameter, <nummer>.txt wird hier angefügt
+      /**/
+      Serial.print(F("CreateNew: "));
+      Serial.print(fn);
+      Serial.println();
+      /**/
+      if (fn == "")
+      {
+        Illegal404();
+        return;
+      }
+      int fsi = getFileSystemIndex();
+
+      int index = 0;
+      while (fsinfo[fsi].filesystem->exists(fn + String(index) + ".txt"))
+      {
+        index++;
+      }
+      File file = fsinfo[fsi].filesystem->open(fn + String(index) + ".txt", FILE_WRITE);
+      file.close();
+
+      fileManager->send(200, "text/plain", "");
       return; //<<==========================
     }
   }

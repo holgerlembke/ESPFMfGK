@@ -108,6 +108,8 @@ public:
   const static uint32_t flagIsValidTargetFilename =  1 << 9;
   // beim Überprüfen, ob eine Dateisystem-Aktion zulässig ist
   const static uint32_t flagIsValidAction =  1 << 10;
+  // allowed to create new files
+  const static uint32_t flagCanCreateNew =  1 << 11;
 
   ESPxWebCallbackFlags_t checkFileFlags = NULL;
   ESPxWebCallbackURL_t checkURLs = NULL;

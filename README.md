@@ -1,11 +1,17 @@
 # ESPFMfGK
+
 ESP32 File Manager for Generation Klick
 
-Ongoing work
+image
 
 
+ESPFMfGK is a simple to use web interface that allows you to upload files with drag and drop, download files, edit files, move files and much more within your ESP32 file space. It supports all file systems (FFAT, SD, SD-MMC, LittleFS, SPIFFS) and an unlimited number of devices all at the same time. 
 
 # File menu functions
+
+### Download
+
+Click on the filename. File is downloaded. That simple.
 
 ### Delete
 
@@ -30,6 +36,9 @@ Lets edit a file! Works well for everything that is editable.
 
 Opens a preview window for the file. It depends on what the browser can display, so everything editable and JPEG/PNG files should work. The windows existance is disconnected from the files existance, it is a snapshot.
 
+# Usage
+
+Take the example. It is a good boiler plate to start from and to explain the security system around managing files visibility and operations. In most cases it will be a simple copy-paste-use thingy.
 
 
 
