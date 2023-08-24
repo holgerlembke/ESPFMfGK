@@ -18,6 +18,7 @@
      + Preview. Yeah.
      + Rename works across folder structures (ok, it is copy+delete)
      + create empty new file
+     + deflate datafiles. 8k instead of 33k
 
     V1.5
      x starting rework for version 2.0
@@ -68,13 +69,21 @@
 #include <WebServer.h>
 #include <FS.h>
 
-/* Undefine this to save about 33k code space.
+/* Undefine both of these to save about 8k to 33k code space.
      Now you have to put the files from "<library>/filemanager" into a FS.
      The FS is indexed by FileSystemIndexForWebPages and follows the order used by AddFS().
      So by default the /fm.* are put on the first added FS, that one, that is shown in the browser by default as the first FS.
      You can use the callback to hide the /fm.* files, isFileManagerInternalFile(String fn) helps with that.
+
+     Difference:
+       fileManagerServerStaticsInternallyDeflate is compressed and a tiny little bit violation protocol
+          by allways serving deflate files, whatever the browsers asks for...
+       fileManagerServerStaticsInternally serves pure uncompressed data. Huge. 33k.
+
+     For compatibility reasons, the fileManagerServerStaticsInternally is activated by default.
 */
 // #define fileManagerServerStaticsInternally
+// #define fileManagerServerStaticsInternallyDeflate
 
 
 // Callback for "foreign" URLs called to web server. If not set, all files will be served

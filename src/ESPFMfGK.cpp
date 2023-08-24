@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include <inttypes.h>
 #include <ESPFMfGK.h>
-#include <ESPFMfGKWp.h>   // web page/javascript/css
-#include <ESPFMfGKWpF2.h> // some form fragments
+#include <ESPFMfGKWp.h>        // web page/javascript/css
+#include <ESPFMfGKWpDeflate.h> // web page/javascript/css
+#include <ESPFMfGKWpF2.h>      // some form fragments
 
 #include <crc32.h>
 
@@ -161,6 +162,30 @@ bool ESPFMfGK::isFileManagerInternalFile(String fn)
 void ESPFMfGK::fileManagerNotFound(void)
 {
   String uri = fileManager->uri();
+
+#ifdef fileManagerServerStaticsInternallyDeflate
+  if ((uri == "/fm.html") || (uri == "/"))
+  {
+    Serial.println("senddeflat");
+    fileManager->sendHeader("Content-Encoding", "deflate");
+    fileManager->send_P(200, "text/html", ESPFMfGKWpindexpageDeflate, sizeof(ESPFMfGKWpindexpageDeflate));
+    return;
+  }
+  if (uri == "/fm.css")
+  {
+    Serial.println("senddeflat");
+    fileManager->sendHeader("Content-Encoding", "deflate");
+    fileManager->send_P(200, "text/css", ESPFMfGKWpcssDeflate, sizeof(ESPFMfGKWpcssDeflate));
+    return;
+  }
+  if (uri == "/fm.js")
+  {
+    Serial.println("senddeflat");
+    fileManager->sendHeader("Content-Encoding", "deflate");
+    fileManager->send_P(200, "text/javascript", ESPFMfGKWpjavascriptDeflate, sizeof(ESPFMfGKWpjavascriptDeflate));
+    return;
+  }
+#endif
 
 #ifndef fileManagerServerStaticsInternally
   if (uri == "/")

@@ -49,11 +49,20 @@ They explain the security system around managing files visibility and operations
 
 # define fileManagerServerStaticsInternally
 
-By design concept ESPFMfGK is inteded as "drop it in and that is it" solution. To archive that it includes its
-own
-html/css/javascript files. These are stored in code space and eat something around 35k.
+By design concept ESPFMfGK is inteded as "drop it in and that is it" solution. To archive that it includes 
+its own html/css/javascript files. They are stored in code space and eat something around 35k.
 
 If you want to reduce the code footprint, undefine that define and put those files into the first added filesystem. No free lunch, either code space or file system.
+
+# define fileManagerServerStaticsInternallyDeflate
+
+After reading that stuff in the chapter above there is an alternative version of storing the html/css/javascript files in code space: deflated data. That reduces the footprint to about 10k.
+
+It is a tiny little bit http-protocol incompatible by ignoring whatever content the browser requests and always sending the deflated data.
+
+So either define one of those defines or none.
+
+(All numbers are ballpark figures only and generous rounded up to include future code expansions.)
 
 
 # Stuff I used
