@@ -82,7 +82,7 @@
 
      For compatibility reasons, the fileManagerServerStaticsInternally is activated by default.
 */
-// #define fileManagerServerStaticsInternally
+#define fileManagerServerStaticsInternally
 // #define fileManagerServerStaticsInternallyDeflate
 
 
