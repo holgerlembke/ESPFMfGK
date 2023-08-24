@@ -4,8 +4,9 @@ ESP32 File Manager for Generation Klick
 
 image
 
-
 ESPFMfGK is a simple to use web interface that allows you to upload files with drag and drop, download files, edit files, move files and much more within your ESP32 file space. It supports all file systems (FFAT, SD, SD-MMC, LittleFS, SPIFFS) and an unlimited number of devices all at the same time. 
+
+ESPFMfGK is the successor of Award Winning https://github.com/holgerlembke/ESPxWebFlMgr.
 
 # File menu functions
 
@@ -36,11 +37,23 @@ Lets edit a file! Works well for everything that is editable.
 
 Opens a preview window for the file. It depends on what the browser can display, so everything editable and JPEG/PNG files should work. The windows existance is disconnected from the files existance, it is a snapshot.
 
+### Download all files
+
+Broken. Work for later.
+
 # Usage
 
-Take the example. It is a good boiler plate to start from and to explain the security system around managing files visibility and operations. In most cases it will be a simple copy-paste-use thingy.
+Look into the examples. They are a good boiler plate to start from.
 
+They explain the security system around managing files visibility and operations. In most cases it will be a simple copy-paste-use thingy. 
 
+# define fileManagerServerStaticsInternally
+
+By design concept ESPFMfGK is inteded as "drop it in and that is it" solution. To archive that it includes its
+own
+html/css/javascript files. These are stored in code space and eat something around 35k.
+
+If you want to reduce the code footprint, undefine that define and put those files into the first added filesystem. No free lunch, either code space or file system.
 
 
 # Stuff I used

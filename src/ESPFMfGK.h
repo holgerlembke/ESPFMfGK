@@ -17,6 +17,7 @@
      + charset-support, utf-8 scheint zu funktionieren
      + Preview. Yeah.
      + Rename works across folder structures (ok, it is copy+delete)
+     + create empty new file
 
     V1.5
      x starting rework for version 2.0
@@ -67,7 +68,7 @@
 #include <WebServer.h>
 #include <FS.h>
 
-/* Undefine this to save about 10k code space.
+/* Undefine this to save about 33k code space.
      Now you have to put the files from "<library>/filemanager" into a FS.
      The FS is indexed by FileSystemIndexForWebPages and follows the order used by AddFS().
      So by default the /fm.* are put on the first added FS, that one, that is shown in the browser by default as the first FS.
@@ -114,8 +115,12 @@ public:
   ESPxWebCallbackFlags_t checkFileFlags = NULL;
   ESPxWebCallbackURL_t checkURLs = NULL;
 
+  // Frage aller Fragen: sollte eine automatische Umschaltung Flat/Treeview gebaut werden und
+  //                     wie wäre dann der Ablauf
+  enum DefaultViewMode_t { dvmNone, dvmFlat, dvmTree };
+
 private:
-  struct FileSystemInfo_t
+  struct FileSystemInfo_t  // sizeof: 24, packed: 21
   {
     String fsname;
     bool AutoTreemode;
@@ -166,7 +171,7 @@ private:
   int WriteChunk(const char *b, size_t l);
 
   // Hlpr für die Verwaltung, was angezeigt werden soll
-  static const int8_t maxfilesystems = 3;                             // !!!!!!!
+  static const int8_t maxfilesystems = 4;                             // !!!!!!!
   FileSystemInfo_t fsinfo[maxfilesystems];
   int maxfilesystem = 0;
   int lastFileSystemIndex = -1;

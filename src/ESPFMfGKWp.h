@@ -26,7 +26,10 @@ static const char ESPFMfGKWpindexpage[] PROGMEM = R"==x==(
       </svg>
     </div>
     <!-- <div class="o2" id="o2">&nbsp;</div> -->
-    <div class="o2" id="o2">&nbsp;</div>
+    <div class="o2" id="o2">
+      <div id="o2i1">&nbsp;</div>
+      <div id="o2i2" title="Create an empty file" onclick="makeemptyfile();">&nbsp;&#xFF0B;&nbsp;</div>      
+    </div>
     <div class="o3" id="o3">&nbsp;</div>
     <div class="o4">&nbsp;</div>
 
@@ -66,6 +69,9 @@ static const char ESPFMfGKWpindexpage[] PROGMEM = R"==x==(
         <div id="ei">
           Editor should appear here.
         </div>
+        <div id="pv">
+          Preview should appear here.
+        </div>
       </div>
     </div>
   </div>
@@ -78,11 +84,12 @@ static const char ESPFMfGKWpindexpage[] PROGMEM = R"==x==(
 
 static const char ESPFMfGKWpjavascript[] PROGMEM = R"==x==(
 
-var elemento2 = null;
+var elemento2i1 = null;
 var elemento3 = null;
 var elementmsg = null;
 var elementfi = null;
 var elementei = null;
+var elementpv = null;
 var elementti = null;
 var elementpi = null;
 var elementws = null;
@@ -90,8 +97,10 @@ var elementws = null;
 var sektionstrenner = String.fromCharCode(3, 1, 2);
 var antworttrenner = String.fromCharCode(2, 1, 3);
 var itemtrenner = String.fromCharCode(2, 1, 4);
+var bootinfotrenner = String.fromCharCode(2, 1, 7);
 
 var foldername = "";
+var windowcounter = 0;
 
 var pathinsertintro =
     "<div id=\"pl\"><div class=\"po1\"></div><div class=\"po2\"><div></div></div><div class=\"po3\"></div><div class=\"po4\"><div>";
@@ -100,6 +109,10 @@ var pathinsertextro =
     "</div></div><div class=\"po5\"></div><div class=\"po6\"><div></div></div><div class=\"po7\"></div>" +
     "<div class=\"pu1\"></div><div class=\"pu2\"></div><div class=\"pu3\"></div><div class=\"pu4\">&nbsp;</div>" +
     "<div class=\"pu5\"></div><div class=\"pu6\"></div><div class=\"pu7\"></div></div>";
+
+var windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div>"+
+"<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>"+
+"<div class=\"windowgrip\">:::</div></div>";
 
 //000000000000000000000000000
 function compressurlfile(source) {
@@ -195,6 +208,16 @@ function showfolder(level, folder) {
 }
 
 //000000000000000000000000000
+function progressfunc(evt) {
+    /*        
+          var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
+          if (lastpercentComplete != percentComplete) {
+            lastpercentComplete = percentComplete;
+    */
+    msgline("Fetching data: " + evt.loaded + "  B");
+}
+
+//000000000000000000000000000
 function getfileinsert() {
     var param = getFileSystemIndex();
     var cb = document.getElementById("treeview");
@@ -207,15 +230,7 @@ function getfileinsert() {
 
     msgline("Fetching files infos...");
     var request = new XMLHttpRequest();
-    request.onprogress = function (evt) {
-        /*        
-              var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
-              if (lastpercentComplete != percentComplete) {
-                lastpercentComplete = percentComplete;
-        */
-        msgline("Fetching files infos, " + evt.loaded + "  B received.");
-        // console.log('Info: '+evt.loaded);
-    }
+    request.onprogress = progressfunc;
     request.onreadystatechange = AnswerProcessor;
     request.open('GET', '/i?fs=' + param + '&t=' + wantstree + '&pn=' + foldername, true);
     request.send(null);
@@ -295,7 +310,7 @@ function AnswerProcessor() {
         var res = sections[1].split(antworttrenner);
 
         elemento3.innerHTML = res[1];
-        elemento2.innerHTML = res[2];
+        elemento2i1.innerHTML = res[2];
 
         var items = res[0].split(itemtrenner);
         var itemhtml = "<div class=\"cc\"><div class=\"gc\">";
@@ -325,7 +340,7 @@ function AnswerProcessor() {
                 s += "<button title=\"Delete\" onclick=\"deletefile('%fn')\">D</button>";
             }
             if ((flags & (1 << 1)) != 0) { // flagcanrename
-                s += "<button title=\"Rename\" onclick=\"renamefile('%fn')\">R</button>";
+                s += "<button title=\"Rename/Move\nEven to a difference device.\" onclick=\"renamefile('%fn')\">R</button>";
             }
             if ((flags & (1 << 2)) != 0) { // flagcanedit
                 s += "<button title=\"Edit\" onclick=\"editfile('%fn')\">E</button>";
@@ -376,9 +391,7 @@ function AnswerProcessor() {
 function getbootinfo() {
     msgline("Get display infos...");
     var request = new XMLHttpRequest();
-    request.onprogress = function (evt) {
-        msgline("Fetching display infos, " + evt.loaded + "  B received.");
-    }
+    request.onprogress = progressfunc;
     request.onreadystatechange = BootAnswerProcessor;
     request.open('GET', '/b', true);
     request.send(null);
@@ -388,29 +401,26 @@ function getbootinfo() {
 function BootAnswerProcessor() {
     var DONE = this.DONE || 4;
     if (this.readyState === DONE) {
-        var antworttrenner = String.fromCharCode(02, 01, 07);
-        var res = this.responseText.split(antworttrenner);
+        var res = this.responseText.split(bootinfotrenner);
 
         // console.log('Bootinfos: '+res.length);
 
         // ESPxWebFlMgr2::Backgroundcolor
-        if (res[0] != "") {
+        if ((res.length>=1) && (res[0] != "")) {
             var c = document.getElementsByClassName('background');
             for (i = 0; i < c.length; i++) {
                 c[i].style.backgroundColor = res[0];
             }
         }
         // ESPxWebFlMgr2::ExtraHTMLfoot
-        if (res[1] != "") {
+        if ((res.length>=2) && (res[1] != "")) {
             var d = document.getElementById("foot");
             d.innerHTML = res[1];
         }
 
         // Seitentitle
-        if (res[2] != "") {
-            if (document.title != res[2]) {
-                document.title = res[2];
-            }
+        if ((res.length>=3) && (res[2] != "")) {
+           document.title = res[2];
         }
 
         // und nun kann die Dateiliste geholt werden
@@ -438,6 +448,12 @@ function deletefile(filename) {
 }
 
 //000000000000000000000000000
+function makeemptyfile(filename) {
+    msgline("Please wait. Create new empty file...");
+    executecommand("job=createnew&fn=" + foldername + "/newfile");
+}
+
+//000000000000000000000000000
 function renamefile(filename) {
     var newname = prompt("new name for " + filename, filename);
     if (newname != null) {
@@ -446,28 +462,85 @@ function renamefile(filename) {
     }
 }
 
-var editxhr;
+//000000000000000000000000000
+function previewfile(filename) {
+    msgline("Please wait. Creating preview...");
+
+    var previewxhr = new XMLHttpRequest();
+    previewxhr.responseType = "blob";
+    previewxhr.onreadystatechange = function () {
+        var DONE = this.DONE || 4;
+        if (this.readyState === DONE) {
+            var newwin = windowhtml;
+
+            var winid = "win"+windowcounter;
+            newwin = newwin.replaceAll("%i%", "win"+windowcounter);
+            newwin = newwin.replaceAll("%t%", filename);
+            var elem = document.createRange().createContextualFragment(newwin);
+            document.body.appendChild(elem);
+
+            // console.log(previewxhr.getResponseHeader('content-type'));
+            // alles furchtbar umständlich, weil bilder nur als BLOB funktionieren und Text daher wieder aus dem Blob gelesen werden muss... 
+
+            var content = document.querySelector("#"+winid+" .windowcontent");
+            var dragger = document.querySelector("#"+winid+" .windowtitle");
+            var winid = '#'+"win"+windowcounter;
+            var node = document.querySelector(winid);
+
+            if (previewxhr.getResponseHeader('content-type').startsWith("image/")) {
+              var image = new Image();
+              image.src = URL.createObjectURL(previewxhr.response);
+              content.appendChild(image);
+              makeDraggable(node);
+            } else {
+              content.style.whiteSpace = "pre";
+              const reader = new FileReader();
+              reader.addEventListener('loadend', (e) => {
+                content.textContent = e.srcElement.result;
+                // Warten, bis Content vollständig ASYNC!
+                makeDraggable(node);
+              });
+              reader.readAsText(previewxhr.response);
+            }             
+
+            windowcounter++;
+            msgline("");
+            waitspinner(false);
+        }
+    };
+    previewxhr.onprogress = progressfunc;
+    previewxhr.open('GET', "/job?fs=" + getFileSystemIndex() + "&job=preview&fn=" + filename, true);
+    previewxhr.send(null);
+    waitspinner(true);
+}
 
 //000000000000000000000000000
 function editfile(filename) {
     msgline("Please wait. Creating editor...");
-    hidepathtree();
 
-    editxhr = new XMLHttpRequest();
+    var editxhr = new XMLHttpRequest();
     editxhr.onreadystatechange = function () {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             hidepathtree();
             elementfi.innerHTML = "";
             elementfi.style.visibility = "collapse";
-            elementei.innerHTML = editxhr.responseText;
-            elementei.style.visibility = "visible";
+            elementei.innerHTML = this.responseText;
+            elementei.style.display = "block";
             elemento3.innerHTML = "Edit " + filename;
+
+            var elem = document.getElementById("tect");
+            elem.style.height = (window.innerHeight-120)+"px";
+            elem.style.width = (window.innerWidth-150)+"px";
+
             msgline("");
+            waitspinner(false);
         }
     };
+    editxhr.onprogress = progressfunc;
     editxhr.open('GET', "/job?fs=" + getFileSystemIndex() + "&job=edit&fn=" + filename, true);
     editxhr.send(null);
+    waitspinner(true);
 }
 
 //000000000000000000000000000
@@ -498,11 +571,12 @@ function sved(filename) {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             elementei.innerHTML = "";
-            elementei.style.visibility = "collapse";
+            elementei.style.display = "none";
             elementfi.style.visibility = "visible";
             getfileinsert();
         }
     }
+    xhr.onprogress = progressfunc;
 
     xhr.send(body);
 }
@@ -510,7 +584,7 @@ function sved(filename) {
 //000000000000000000000000000
 function abed() {
     elementei.innerHTML = "";
-    elementei.style.visibility = "collapse";
+    elementei.style.display = "none";
     elementfi.style.visibility = "visible";
     getfileinsert();
 }
@@ -523,16 +597,7 @@ function uploadFile(file, islast) {
     uploaddone = false;
     var xhr = new XMLHttpRequest();
     lastpercentComplete = -1;
-    xhr.upload.onprogress = function (evt) {
-        if (evt.lengthComputable) {
-            var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
-            if (lastpercentComplete != percentComplete) {
-                lastpercentComplete = percentComplete;
-                msgline("Please wait. Upload progress " + percentComplete + "%");
-                // console.log('Progress: '+percentComplete);
-            }
-        }
-    }
+    xhr.upload.onprogress = progressfunc;
     xhr.onreadystatechange = function () {
         // console.log(xhr.status);
         var DONE = this.DONE || 4;
@@ -544,7 +609,7 @@ function uploadFile(file, islast) {
             uploaddone = true;
         }
     };
-    xhr.open('POST', '/r?fs=' + getFileSystemIndex() + '&fn=' + file.name);
+    xhr.open('POST', '/r?fs=' + getFileSystemIndex() + '&fn=' + foldername + "/" + file.name);
     var formdata = new FormData();
     formdata.append('uploadfile', file);
     // not sure why, but with that the upload to esp32 is stable.
@@ -573,6 +638,7 @@ function uploadFileProzessor() {
 
 //000000000000000000000000000
 function dropHandler(ev) {
+    waitspinner(true);
     console.log('File(s) dropped');
 
     globaldropfilelisthlpr = ev.dataTransfer;
@@ -628,13 +694,121 @@ function downloadall() {
 }
 
 //000000000000000000000000000
+function makeDraggable(box) {
+    let cX = 0, cY = 0, pX = 0, pY = 0;
+
+    box.setAttribute("floater", "true");
+    box.classList.add("windowstyle");
+    let content = box.querySelector('.windowcontent');
+    if (content) {
+      if (content.clientHeight>window.innerHeight) {
+        content.style.height=window.innerHeight/2+"px";
+      }
+      if (content.clientWidth>window.innerWidth) {
+        content.style.width=window.innerWidth/2+"px";
+      }
+    }
+
+    let title = box.querySelector('.windowtitle');
+    if (title) {
+        title.addEventListener('mousedown', startDrag);
+    }
+    let resizer = box.querySelector('.windowgrip');
+    if (resizer) {
+        resizer.addEventListener('mousedown', startResize);
+    }
+    let closer = box.querySelector('.windowclose');
+    if (closer) {
+        closer.addEventListener('click', closewindow);
+    }
+    bringbox2front();
+
+    // Closing
+    function closewindow() {
+        closer.removeEventListener('click', closewindow);
+        resizer.removeEventListener('mousedown', startResize);
+        title.removeEventListener('mousedown', startDrag);
+        box.innerHTML = "";
+        box.style.display = "none";
+    }
+
+    // Stacking
+    function bringbox2front() {
+        let all = document.querySelectorAll('[floater]');
+        let maxz = -1;
+
+        for (var i = 0; i < all.length; i++) {
+            if (all[i] != box) {
+                let zi = parseInt(window.getComputedStyle(all[i]).zIndex);
+                if ((zi > maxz)) {
+                    maxz = zi;
+                }
+            }
+        }
+        if (window.getComputedStyle(box).zIndex <= maxz) {
+            box.style.zIndex = maxz + 1;
+        }
+    }
+
+    // Resizeing
+    function startDrag(e) {
+        bringbox2front();
+        e.preventDefault();
+        pX = e.clientX;
+        pY = e.clientY;
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('mousemove', drag);
+    }
+
+    function drag(e) {
+        e.preventDefault();
+        cX = pX - e.clientX;
+        cY = pY - e.clientY;
+        pX = e.clientX;
+        pY = e.clientY;
+        box.style.top = (box.offsetTop - cY) + 'px';
+        box.style.left = (box.offsetLeft - cX) + 'px';
+    }
+
+    function endDrag() {
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('mousemove', drag);
+    }
+
+    // Resize
+    function startResize(e) {
+        e.preventDefault();
+        pX = e.clientX;
+        pY = e.clientY;
+        document.addEventListener('mouseup', endResize);
+        document.addEventListener('mousemove', resize);
+    }
+
+    function resize(e) {
+        e.preventDefault();
+        box.style.width = e.pageX - box.getBoundingClientRect().left + 'px';
+        box.style.height = e.pageY - box.getBoundingClientRect().top + 'px';
+        if (content) {
+          content.style.width = e.pageX - content.getBoundingClientRect().left + 'px';
+          content.style.height = e.pageY - content.getBoundingClientRect().top + 'px';
+        }
+    }
+
+    function endResize() {
+        document.removeEventListener('mouseup', endResize);
+        document.removeEventListener('mousemove', resize);
+    }
+}
+
+//000000000000000000000000000
 function boot() {
     // Does lookup need time?  
-    elemento2 = document.getElementById("o2");
+    elemento2i1 = document.getElementById("o2i1");
     elemento3 = document.getElementById('o3');
     elementmsg = document.getElementById('msg');
     elementfi = document.getElementById("fi");
     elementei = document.getElementById("ei");
+    elementpv = document.getElementById("pv");
     elementti = document.getElementById("ti");
     elementpi = document.getElementById("pi");
     elementws = document.getElementById("wait");
@@ -687,8 +861,8 @@ div {
 
 #fi {}
 
-#ei {
-  visibility: collapse;
+#ei, #pv {
+  display: none;
 }
 
 .o1 {
@@ -702,6 +876,24 @@ div {
   grid-area: o2;
   background-color: #9999FF;
   margin-bottom: 0px;
+  white-space: nowrap;
+  display: grid; 
+  grid-auto-rows: 1fr; 
+  grid-template-columns: 1fr 20px; 
+  gap: 0px 0px; 
+}
+
+#o2i2 {
+  background-color: #BBB2FF;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+  color: white;
+}
+
+#o2i2:hover {
+  background-color: #D36669;
+  color: black;
 }
 
 .o2 select {
@@ -715,6 +907,10 @@ div {
   border: 0px;
   color: black;
   background-color: white;
+}
+
+.o2 label {
+  color: white;
 }
 
 .o3 {
@@ -884,8 +1080,8 @@ div {
 
 .fnecc {
   width: min-content;
-  margin: 0;
-
+  margin: 0 1px;
+  padding-top: 2px;
   display: grid;
   grid-auto-rows: 1fr;
   grid-template-columns: 1fr 1fr;
@@ -899,8 +1095,8 @@ div {
 }
 
 .fne {
+  margin: 1px 0px 2px 0px;
   background-color: white;
-
 }
 
 .fnegc div {
@@ -949,12 +1145,7 @@ div {
   border-radius: 4px;
 }
 
-/* Editor window */
-#tect {
-  width:90%; 
-  height:90%;
-}
-
+// EditorInsert
 #ei button {
   white-space: nowrap; 
   background-color: #F8FBDB;
@@ -1039,12 +1230,69 @@ div {
   margin-top: 0.1em;
 }
 
+/* Windows */
+.windowstyle {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    z-index: 9;
+    background-color: #f1f1f1;
+}
+
+.windowcontent {
+    overflow:scroll;
+    overflow-x:hidden;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid #D8A570;
+}
+
+.windowtitle {
+    display: grid; 
+    margin: 0;
+    grid-auto-rows: 1fr; 
+    grid-template-columns: 1fr 20px; 
+    gap: 0px 0px; 
+}    
+ 
+.windowtitle .t {
+    padding-right: 10px;
+    padding-left: 10px;
+    margin:0 2px 0 0;
+    cursor: move;
+    z-index: 12;
+    background-color: #D8A570;
+    border-top-left-radius: 10px;
+    color: #fff;
+}
+
+.windowclose {
+    cursor: default;
+    padding: 0;
+    margin: 0;
+    font-size: 0.1em;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color: #B67CD0;
+}
+
+.windowclose:hover {
+    background-color: #959FFE;
+}
 
 
-
-
-
-
+.windowgrip {
+    z-index: 12;
+    margin: 0;
+    padding: 0;
+    float: right;
+    position: absolute;
+    bottom: 0;
+    right: 10px;
+    width: 1em;
+    cursor: nwse-resize;
+}
 
   )==g==";
 

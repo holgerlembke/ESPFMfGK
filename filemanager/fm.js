@@ -1,4 +1,4 @@
-var elemento2 = null;
+var elemento2i1 = null;
 var elemento3 = null;
 var elementmsg = null;
 var elementfi = null;
@@ -11,6 +11,7 @@ var elementws = null;
 var sektionstrenner = String.fromCharCode(3, 1, 2);
 var antworttrenner = String.fromCharCode(2, 1, 3);
 var itemtrenner = String.fromCharCode(2, 1, 4);
+var bootinfotrenner = String.fromCharCode(2, 1, 7);
 
 var foldername = "";
 var windowcounter = 0;
@@ -223,7 +224,7 @@ function AnswerProcessor() {
         var res = sections[1].split(antworttrenner);
 
         elemento3.innerHTML = res[1];
-        elemento2.innerHTML = res[2];
+        elemento2i1.innerHTML = res[2];
 
         var items = res[0].split(itemtrenner);
         var itemhtml = "<div class=\"cc\"><div class=\"gc\">";
@@ -253,7 +254,7 @@ function AnswerProcessor() {
                 s += "<button title=\"Delete\" onclick=\"deletefile('%fn')\">D</button>";
             }
             if ((flags & (1 << 1)) != 0) { // flagcanrename
-                s += "<button title=\"Rename\" onclick=\"renamefile('%fn')\">R</button>";
+                s += "<button title=\"Rename/Move\nEven to a difference device.\" onclick=\"renamefile('%fn')\">R</button>";
             }
             if ((flags & (1 << 2)) != 0) { // flagcanedit
                 s += "<button title=\"Edit\" onclick=\"editfile('%fn')\">E</button>";
@@ -314,29 +315,26 @@ function getbootinfo() {
 function BootAnswerProcessor() {
     var DONE = this.DONE || 4;
     if (this.readyState === DONE) {
-        var antworttrenner = String.fromCharCode(02, 01, 07);
-        var res = this.responseText.split(antworttrenner);
+        var res = this.responseText.split(bootinfotrenner);
 
         // console.log('Bootinfos: '+res.length);
 
         // ESPxWebFlMgr2::Backgroundcolor
-        if (res[0] != "") {
+        if ((res.length>=1) && (res[0] != "")) {
             var c = document.getElementsByClassName('background');
             for (i = 0; i < c.length; i++) {
                 c[i].style.backgroundColor = res[0];
             }
         }
         // ESPxWebFlMgr2::ExtraHTMLfoot
-        if (res[1] != "") {
+        if ((res.length>=2) && (res[1] != "")) {
             var d = document.getElementById("foot");
             d.innerHTML = res[1];
         }
 
         // Seitentitle
-        if (res[2] != "") {
-            if (document.title != res[2]) {
-                document.title = res[2];
-            }
+        if ((res.length>=3) && (res[2] != "")) {
+           document.title = res[2];
         }
 
         // und nun kann die Dateiliste geholt werden
@@ -361,6 +359,12 @@ function deletefile(filename) {
         msgline("Please wait. Delete in progress...");
         executecommand("job=del&fn=" + filename);
     }
+}
+
+//000000000000000000000000000
+function makeemptyfile(filename) {
+    msgline("Please wait. Create new empty file...");
+    executecommand("job=createnew&fn=" + foldername + "/newfile");
 }
 
 //000000000000000000000000000
@@ -427,7 +431,6 @@ function previewfile(filename) {
 //000000000000000000000000000
 function editfile(filename) {
     msgline("Please wait. Creating editor...");
-    hidepathtree();
 
     var editxhr = new XMLHttpRequest();
     editxhr.onreadystatechange = function () {
@@ -441,8 +444,8 @@ function editfile(filename) {
             elemento3.innerHTML = "Edit " + filename;
 
             var elem = document.getElementById("tect");
-            elem.style.height = "90%"; // window.innerHeight/2+"px";
-            elem.style.width = "90%"; // window.innerWidth/2+"px";
+            elem.style.height = (window.innerHeight-120)+"px";
+            elem.style.width = (window.innerWidth-150)+"px";
 
             msgline("");
             waitspinner(false);
@@ -520,7 +523,7 @@ function uploadFile(file, islast) {
             uploaddone = true;
         }
     };
-    xhr.open('POST', '/r?fs=' + getFileSystemIndex() + '&fn=' + file.name);
+    xhr.open('POST', '/r?fs=' + getFileSystemIndex() + '&fn=' + foldername + "/" + file.name);
     var formdata = new FormData();
     formdata.append('uploadfile', file);
     // not sure why, but with that the upload to esp32 is stable.
@@ -714,7 +717,7 @@ function makeDraggable(box) {
 //000000000000000000000000000
 function boot() {
     // Does lookup need time?  
-    elemento2 = document.getElementById("o2");
+    elemento2i1 = document.getElementById("o2i1");
     elemento3 = document.getElementById('o3');
     elementmsg = document.getElementById('msg');
     elementfi = document.getElementById("fi");

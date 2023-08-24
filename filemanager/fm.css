@@ -50,6 +50,24 @@ div {
   grid-area: o2;
   background-color: #9999FF;
   margin-bottom: 0px;
+  white-space: nowrap;
+  display: grid; 
+  grid-auto-rows: 1fr; 
+  grid-template-columns: 1fr 20px; 
+  gap: 0px 0px; 
+}
+
+#o2i2 {
+  background-color: #BBB2FF;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+  color: white;
+}
+
+#o2i2:hover {
+  background-color: #D36669;
+  color: black;
 }
 
 .o2 select {
@@ -63,6 +81,10 @@ div {
   border: 0px;
   color: black;
   background-color: white;
+}
+
+.o2 label {
+  color: white;
 }
 
 .o3 {
@@ -232,8 +254,8 @@ div {
 
 .fnecc {
   width: min-content;
-  margin: 0;
-
+  margin: 0 1px;
+  padding-top: 2px;
   display: grid;
   grid-auto-rows: 1fr;
   grid-template-columns: 1fr 1fr;
@@ -247,8 +269,8 @@ div {
 }
 
 .fne {
+  margin: 1px 0px 2px 0px;
   background-color: white;
-
 }
 
 .fnegc div {
@@ -297,12 +319,7 @@ div {
   border-radius: 4px;
 }
 
-/* Editor window */
-#tect {
-  width:90%; 
-  height:90%;
-}
-
+// EditorInsert
 #ei button {
   white-space: nowrap; 
   background-color: #F8FBDB;
@@ -433,6 +450,11 @@ div {
     border-bottom-right-radius: 10px;
     background-color: #B67CD0;
 }
+
+.windowclose:hover {
+    background-color: #959FFE;
+}
+
 
 .windowgrip {
     z-index: 12;

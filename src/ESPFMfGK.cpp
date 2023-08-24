@@ -698,15 +698,23 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
 
   int fsi = getFileSystemIndex();
 
-  if (fsinfo[fsi].filesystem->exists(fn))
-  { // file exists!
-    if (checkFileFlags(*fsinfo[fsi].filesystem, fn, flagIsValidAction | flag) & flag == 0)
-    {
-      return "";
-    }
-
-    // Yeah.
+  // Sonderregel, wenn eine neue Datei erstellt werden soll
+  if (flag & flagCanCreateNew)
+  {
     return fn;
+  }
+  else
+  {
+    if (fsinfo[fsi].filesystem->exists(fn))
+    { // file exists!
+      if (checkFileFlags(*fsinfo[fsi].filesystem, fn, flagIsValidAction | flag) & flag == 0)
+      {
+        return "";
+      }
+
+      // Yeah.
+      return fn;
+    }
   }
 
   return "";
@@ -967,6 +975,10 @@ void ESPFMfGK::fileManagerJobber(void)
       Serial.print(fn);
       Serial.println();
       /**/
+      if (!fn.startsWith("/"))
+      {
+        fn = "/" + fn;
+      }
       if (fn == "")
       {
         Illegal404();
