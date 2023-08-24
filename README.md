@@ -13,6 +13,10 @@ ESPFMfGK is a simple to use web interface that allows you to upload files with d
 
 ESPFMfGK is the successor of Award Winning https://github.com/holgerlembke/ESPxWebFlMgr.
 
+![this is it](https://raw.githubusercontent.com/holgerlembke/ESPFMfGK/main/img/bild4.jpg)
+
+It has a one-the-device file editor. And a persistent preview function.
+
 # File menu functions
 
 ### Download
