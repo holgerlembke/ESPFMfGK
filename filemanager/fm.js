@@ -24,7 +24,7 @@ var pathinsertextro =
     "<div class=\"pu1\"></div><div class=\"pu2\"></div><div class=\"pu3\"></div><div class=\"pu4\">&nbsp;</div>" +
     "<div class=\"pu5\"></div><div class=\"pu6\"></div><div class=\"pu7\"></div></div>";
 
-var windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div>"+
+var windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div><div class=\"g\"></div>"+
 "<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>"+
 "<div class=\"windowgrip\">:::</div></div>";
 

@@ -8,6 +8,9 @@
     lembke@gmail.com
 
   Changes
+    V1.7
+     + preview-fenster-titel transparenz optimiert
+
     V1.6
      + WebPageTitle to set the pweb page title
      + das Konzept für beliebige Dateisysteme steht
@@ -19,6 +22,7 @@
      + Rename works across folder structures (ok, it is copy+delete)
      + create empty new file
      + deflate datafiles. 8k instead of 33k
+     + release as 2.0.1 
 
     V1.5
      x starting rework for version 2.0

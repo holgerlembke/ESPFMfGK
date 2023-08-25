@@ -110,7 +110,7 @@ var pathinsertextro =
     "<div class=\"pu1\"></div><div class=\"pu2\"></div><div class=\"pu3\"></div><div class=\"pu4\">&nbsp;</div>" +
     "<div class=\"pu5\"></div><div class=\"pu6\"></div><div class=\"pu7\"></div></div>";
 
-var windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div>"+
+var windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div><div class=\"g\"></div>"+
 "<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>"+
 "<div class=\"windowgrip\">:::</div></div>";
 
@@ -1236,7 +1236,7 @@ div {
     padding: 0;
     position: absolute;
     z-index: 9;
-    background-color: #f1f1f1;
+    background-color: transparent;
 }
 
 .windowcontent {
@@ -1245,6 +1245,7 @@ div {
     position: relative;
     margin: 0;
     padding: 0;
+    background-color: #f1f1f1;
     border-left: 2px solid #D8A570;
 }
 
@@ -1252,14 +1253,19 @@ div {
     display: grid; 
     margin: 0;
     grid-auto-rows: 1fr; 
-    grid-template-columns: 1fr 20px; 
+    grid-template-columns: 1fr 2px 20px; 
     gap: 0px 0px; 
 }    
  
+.windowtitle .g {
+    background-color: white;
+    margin:0;
+}
+
 .windowtitle .t {
     padding-right: 10px;
     padding-left: 10px;
-    margin:0 2px 0 0;
+    margin:0;
     cursor: move;
     z-index: 12;
     background-color: #D8A570;
