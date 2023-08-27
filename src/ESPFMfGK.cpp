@@ -4,8 +4,7 @@
 #include <ESPFMfGKWp.h>        // web page/javascript/css
 #include <ESPFMfGKWpDeflate.h> // web page/javascript/css
 #include <ESPFMfGKWpF2.h>      // some form fragments
-
-#include <crc32.h>
+#include <ESPFMfGKGa.h>        // Den ZIP-Code
 
 #include <WebServer.h>
 #include <FS.h>
@@ -490,10 +489,18 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
   {
     if (foldername != "/")
     {
+      String collector = "-1:..:" + Folder1LevelUp(foldername);
+      collector += itemtrenner;
+      collector += "-2:" + foldername;
+      collector += itemtrenner;
+      fileManager->sendContent(collector);
+
+      /** /
       fileManager->sendContent("-1:..:" + Folder1LevelUp(foldername));
       fileManager->sendContent(itemtrenner); // 0
       fileManager->sendContent("-2:" + foldername);
       fileManager->sendContent(itemtrenner); // 1
+      /**/
     }
     recurseFolderList(foldername, -1, 0);
   }
@@ -539,6 +546,19 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
 
         if (!(flags & ESPFMfGK::flagIsNotVisible))
         {
+          String collector = String(file.path());
+          collector += itemtrenner;
+          collector += DeUmlautFilename(String(file.path()));
+          collector += itemtrenner;
+          collector += dispFileString(file.size(), false);
+          collector += itemtrenner;
+          collector += colorline(linecounter);
+          collector += itemtrenner;
+          collector += String(flags);
+          collector += itemtrenner;
+          fileManager->sendContent(collector);
+
+          /** /
           fileManager->sendContent(String(file.path()));                   // .path() ist fqfn, .name() nur fn?
           fileManager->sendContent(itemtrenner);                           // 0
           fileManager->sendContent(DeUmlautFilename(String(file.path()))); // Display Name
@@ -549,7 +569,7 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
           fileManager->sendContent(itemtrenner); // 3
           fileManager->sendContent(String(flags));
           fileManager->sendContent(itemtrenner); // 4
-
+          /**/
           linecounter++;
         }
       }
@@ -600,56 +620,43 @@ void ESPFMfGK::fileManagerFileListInsert(void)
 
   int linecounter = 0;
   recurseFolder(path, !sit, maxtiefe, true, linecounter);
-  fileManager->sendContent(antworttrenner);
 
-  String sinfo = "<span title=\"";
+  String collector = antworttrenner + "<span title=\"";
 
   for (uint8_t i = 0; i < maxfilesystem; i++)
   {
-    sinfo += "FS " + String(i) + ": " + fsinfo[i].fsname + "\n";
+    collector += "FS " + String(i) + ": " + fsinfo[i].fsname + "\n";
   }
-  sinfo += "\">&nbsp; Size: " +
-           dispFileString(totalBytes(fsinfo[fsi].filesystem), true) +
-           ", used: " +
-           dispFileString(usedBytes(fsinfo[fsi].filesystem), true) +
-           "</span>";
-  /*
-    fileManager->sendContent(F(" FS blocksize: "));
-    fileManager->sendContent(String(info.blockSize));
-    fileManager->sendContent(F(", pageSize: "));
-    fileManager->sendContent(String(info.pageSize));
-  */
+  collector += "\">&nbsp; Size: " +
+               dispFileString(totalBytes(fsinfo[fsi].filesystem), true) +
+               ", used: " +
+               dispFileString(usedBytes(fsinfo[fsi].filesystem), true) +
+               "</span>";
 
-  fileManager->sendContent(sinfo);
-
-  fileManager->sendContent(antworttrenner);
-
-  fileManager->sendContent(F("<select id=\"memory\" name=\"memory\" onchange=\"fsselectonchange();\">"));
+  collector += antworttrenner;
+  collector += "<select id=\"memory\" name=\"memory\" onchange=\"fsselectonchange();\">";
   for (int i = 0; i < maxfilesystem; i++)
   {
     if (i == fsi)
     {
-      fileManager->sendContent(F("<option selected"));
+      collector += "<option selected";
     }
     else
     {
-      fileManager->sendContent(F("<option"));
+      collector += "<option";
     }
-    fileManager->sendContent(">");
-    fileManager->sendContent(fsinfo[i].fsname);
-    fileManager->sendContent(F("</option>"));
+    collector += ">" + fsinfo[i].fsname + "</option>";
   }
-  fileManager->sendContent(F("</select>"));
+  collector += "</select>";
 
-  fileManager->sendContent(F("<input type=\"checkbox\" id=\"treeview\" name=\"treeview\" "));
-  fileManager->sendContent(F("onchange=\"fsselectonchange();\""));
+  collector += "<input type=\"checkbox\" id=\"treeview\" name=\"treeview\" onchange=\"fsselectonchange();\"";
   if (ShowInTreeView())
   {
-    fileManager->sendContent(F(" checked "));
+    collector += " checked ";
   }
-  fileManager->sendContent(F("/>"));
-  fileManager->sendContent(F("<label for=\"treeview\">Folders</label>"));
+  collector += "/><label for=\"treeview\">Folders</label>";
 
+  fileManager->sendContent(collector);
   // The End.
   fileManager->sendContent("");
 }
@@ -670,20 +677,15 @@ void ESPFMfGK::fileManagerBootinfo(void)
   // hier kann man die globalen Stati initialisieren, weil man weiß, dass die Webseite gerade frisch geladen wird.
   lastFileSystemIndex = -1;
 
-  fileManager->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  fileManager->send(200, F("text/html"), String());
+  String collector =         //
+      BackgroundColor +      //
+      extrabootinfotrenner + //
+      ExtraHTMLfoot +        //
+      extrabootinfotrenner + //
+      WebPageTitle +         //
+      extrabootinfotrenner;
 
-  fileManager->sendContent(BackgroundColor);
-  fileManager->sendContent(extrabootinfotrenner);
-
-  fileManager->sendContent(ExtraHTMLfoot);
-  fileManager->sendContent(extrabootinfotrenner);
-
-  fileManager->sendContent(WebPageTitle);
-  fileManager->sendContent(extrabootinfotrenner);
-
-  // The End.
-  fileManager->sendContent("");
+  fileManager->send(200, F("text/html"), collector);
 }
 
 //*****************************************************************************************************
@@ -706,11 +708,13 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
   // No flags, do nothing
   if (checkFileFlags == NULL)
   {
+    Serial.println("CheckFileFlags==NULL");
     return "";
   }
 
   if (fileManager->args() < 3)
   {
+    Serial.println("Args < 3");
     return "";
   }
 
@@ -718,13 +722,14 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
 
   if (fn == "")
   {
+    Serial.println("arg(fn) is empty");
     return "";
   }
 
   int fsi = getFileSystemIndex();
 
   // Sonderregel, wenn eine neue Datei erstellt werden soll
-  if (flag & flagCanCreateNew)
+  if ((flag & flagCanCreateNew) || (flag & flagAllowInZip))
   {
     return fn;
   }
@@ -734,6 +739,7 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
     { // file exists!
       if (checkFileFlags(*fsinfo[fsi].filesystem, fn, flagIsValidAction | flag) & flag == 0)
       {
+        Serial.println("checkFileFlags fail.");
         return "";
       }
 
@@ -742,6 +748,7 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
     }
   }
 
+  Serial.println("Return nothing");
   return "";
 }
 
@@ -966,6 +973,28 @@ void ESPFMfGK::fileManagerJobber(void)
         return;
       }
       fileManagerFileEditorInsert(fn);
+      return; //<<==========================
+    }
+    else if (jobname == "dwnldll") // downloadall
+    {
+      String fn = getFileNameFromParam(flagAllowInZip | flagCanDownload);
+      /**/
+      Serial.print("Downloadall: ");
+      Serial.print(fn);
+      Serial.println();
+      /**/
+      if (fn == "")
+      {
+        Illegal404();
+        return;
+      }
+      {
+        ESPFMfGKGa *z = new ESPFMfGKGa();
+        z->fileManager = fileManager;
+        z->checkFileFlags = checkFileFlags;
+        z->getAllFilesInOneZIP(fsinfo[getFileSystemIndex()].filesystem, fileManager->arg("folder"));
+        delete z;
+      }
       return; //<<==========================
     }
     else if ((jobname == "download") || (jobname == "preview"))
@@ -1195,282 +1224,6 @@ void ESPFMfGK::fileManagerReceiver(void)
   }
 }
 
-struct __attribute__((__packed__)) zipFileHeader
-{
-  uint32_t signature; // 0x04034b50;
-  uint16_t versionneeded;
-  uint16_t bitflags;
-  uint16_t comp_method;
-  uint16_t lastModFileTime;
-  uint16_t lastModFileDate;
-  uint32_t crc_32;
-  uint32_t comp_size;
-  uint32_t uncompr_size;
-  uint16_t fname_len;
-  uint16_t extra_field_len;
-};
-
-struct __attribute__((__packed__)) zipDataDescriptor
-{
-  uint32_t signature; // 0x08074b50
-  uint32_t crc32;
-  uint32_t comp_size;
-  uint32_t uncompr_size;
-};
-
-struct __attribute__((__packed__)) zipEndOfDirectory
-{
-  uint32_t signature; // 0x06054b50;
-  uint16_t nrofdisks;
-  uint16_t diskwherecentraldirectorystarts;
-  uint16_t nrofcentraldirectoriesonthisdisk;
-  uint16_t totalnrofcentraldirectories;
-  uint32_t sizeofcentraldirectory;
-  uint32_t ofsetofcentraldirectoryrelativetostartofarchiv;
-  uint16_t commentlength;
-};
-
-struct __attribute__((__packed__)) zipCentralDirectoryFileHeader
-{
-  uint32_t signature; // 0x02014b50
-  uint16_t versionmadeby;
-  uint16_t versionneededtoextract;
-  uint16_t flag;
-  uint16_t compressionmethode;
-  uint16_t lastModFileTime;
-  uint16_t lastModFileDate;
-  uint32_t crc_32;
-  uint32_t comp_size;
-  uint32_t uncompr_size;
-  uint16_t fname_len;
-  uint16_t extra_len;
-  uint16_t comment_len;
-  uint16_t diskstart;
-  uint16_t internalfileattr;
-  uint32_t externalfileattr;
-  uint32_t relofsoflocalfileheader;
-  // nun filename, extra field, comment
-};
-
-//*****************************************************************************************************
-int ESPFMfGK::WriteChunk(const char *b, size_t l)
-{
-  //  Serial.print(" Chunk: " + String(l) + " ");
-
-  const char *footer = "\r\n";
-  char chunkSize[11];
-  sprintf(chunkSize, "%zx\r\n", l);
-  fileManager->client().write(chunkSize, strlen(chunkSize));
-  fileManager->client().write(b, l);
-  fileManager->client().write(footer, 2);
-
-  return strlen(chunkSize) + l + 2;
-}
-
-//*****************************************************************************************************
-/* https://en.wikipedia.org/wiki/Zip_(file_format)
-   https://www.fileformat.info/tool/hexdump.htm
-   https://hexed.it/?hl=de
-   HxD https://mh-nexus.de/de/
-
-   This code needs some memory:
-     4 * <nr. of files> + copybuffersize
-
-   Uses no compression, because, well, code size. Should be good for 4mb.
-*/
-void ESPFMfGK::getAllFilesInOneZIP(void)
-{
-  const byte copybuffersize = 100;
-
-  fileManager->setContentLength(CONTENT_LENGTH_UNKNOWN);
-  // fileManager->sendHeader(F("Content-Type"), F("text/text"));
-  // fileManager->sendHeader(F("Transfer-Encoding"), F("chunked"));
-  // fileManager->sendHeader(F("Connection"), F("close"));
-  fileManager->sendHeader(F("Content-Disposition"), F("attachment; filename=alles.zip"));
-  fileManager->sendHeader(F("Content-Transfer-Encoding"), F("binary"));
-  fileManager->send(200, F("application/octet-stream"), "");
-
-  // get the file system. all safe.
-  int fsi = getFileSystemIndex();
-
-  // Pass 0: count files
-  int files = 0;
-  {
-    File file = fsinfo[fsi].filesystem->open("/");
-    while (file)
-    {
-      String fn = file.name();
-      /*
-        if ( (_ViewSysFiles) || (allowAccessToThisFile(fn)) ) {
-        files++;
-        }
-      */
-      file = file.openNextFile();
-    }
-    // Serial.println("Files: "+String(files));
-  }
-  // Store the crcs
-  uint32_t crc_32s[files];
-
-  // Pass 1: local headers + file
-  {
-    zipFileHeader zip;
-    zip.signature = 0x04034b50;
-    zip.versionneeded = 0;
-    zip.bitflags = 1 << 3;
-    zip.comp_method = 0; // stored
-    zip.lastModFileTime = 0x4fa5;
-    zip.lastModFileDate = 0xe44e;
-    zip.extra_field_len = 0;
-
-    int i = 0;
-    File file = fsinfo[fsi].filesystem->open("/");
-    while (file)
-    {
-      String fn = file.name();
-
-      // if ( (_ViewSysFiles) || (allowAccessToThisFile(fn)) ) {
-      if (fn.indexOf("/") == 0)
-      {
-        fn.remove(0, 1); // "/" filenames beginning with "/" dont work for Windows....
-      }
-
-      zip.comp_size = 0;
-      zip.uncompr_size = 0;
-      zip.crc_32 = 0;
-      zip.fname_len = fn.length();
-      WriteChunk((char *)&zip, sizeof(zip));
-      WriteChunk(fn.c_str(), zip.fname_len);
-
-      //        Serial.print("Send: " + fn);
-      // File f = dir.open("r",FILE_READ);
-      int len = file.size();
-
-      // send crc+len later...
-      zipDataDescriptor datadiscr;
-      datadiscr.signature = 0x08074b50;
-      datadiscr.comp_size = len;
-      datadiscr.uncompr_size = len;
-
-      const char *footer = "\r\n";
-      char chunkSize[11];
-      sprintf(chunkSize, "%zx\r\n", len);
-      fileManager->client().write(chunkSize, strlen(chunkSize));
-
-      { // pff.
-        CRC32 crc;
-        byte b[copybuffersize];
-        int lenr = len;
-        while (lenr > 0)
-        {
-          byte r = (lenr > copybuffersize) ? copybuffersize : lenr;
-          file.read(b, r);
-          crc.update(b, r);
-          fileManager->client().write(b, r);
-          lenr -= r;
-        }
-        datadiscr.crc32 = crc.finalize();
-        crc_32s[i] = datadiscr.crc32;
-      }
-
-      fileManager->client().write(footer, 2);
-
-      WriteChunk((char *)&datadiscr, sizeof(datadiscr));
-
-      // f.close();
-      i++;
-      /** /
-              Serial.print(" ");
-              Serial.print(l);
-              Serial.println();
-        /**/
-      //}
-      file = file.openNextFile();
-    }
-  }
-
-  // Pass 2: Central directory Structur
-  {
-    zipEndOfDirectory eod;
-    eod.signature = 0x06054b50;
-    eod.nrofdisks = 0;
-    eod.diskwherecentraldirectorystarts = 0;
-    eod.nrofcentraldirectoriesonthisdisk = 0;
-    eod.totalnrofcentraldirectories = 0;
-    eod.sizeofcentraldirectory = 0;
-    eod.ofsetofcentraldirectoryrelativetostartofarchiv = 0;
-    eod.commentlength = 0;
-
-    zipCentralDirectoryFileHeader CDFH;
-
-    CDFH.signature = 0x02014b50;
-    CDFH.versionmadeby = 0;
-    CDFH.versionneededtoextract = 0;
-    CDFH.flag = 0;
-    CDFH.compressionmethode = 0; // Stored
-    CDFH.lastModFileTime = 0x4fa5;
-    CDFH.lastModFileDate = 0xe44e;
-    CDFH.extra_len = 0;
-    CDFH.comment_len = 0;
-    CDFH.diskstart = 0;
-    CDFH.internalfileattr = 0x01;
-    CDFH.externalfileattr = 0x20;
-    CDFH.relofsoflocalfileheader = 0;
-
-    int i = 0;
-
-    File file = fsinfo[fsi].filesystem->open("/");
-    while (file)
-    {
-      String fn = file.name();
-
-      // if ( (_ViewSysFiles) || (allowAccessToThisFile(fn)) ) {
-      if (fn.indexOf("/") == 0)
-      {
-        fn.remove(0, 1); // "/" filenames beginning with "/" dont work for Windows....
-      }
-      //        Serial.print("CDFH: " + fn);
-      // File f = dir.open("r",FILE_READ);
-      int len = file.size();
-
-      CDFH.comp_size = len;
-      CDFH.uncompr_size = len;
-      CDFH.fname_len = fn.length();
-      CDFH.crc_32 = crc_32s[i];
-
-      // f.close();
-
-      WriteChunk((char *)&CDFH, sizeof(CDFH));
-      WriteChunk(fn.c_str(), CDFH.fname_len);
-
-      int ofs = sizeof(zipFileHeader) + len + CDFH.fname_len + sizeof(zipDataDescriptor);
-
-      // next position
-      CDFH.relofsoflocalfileheader += ofs;
-
-      // book keeping
-      eod.nrofcentraldirectoriesonthisdisk++;
-      eod.totalnrofcentraldirectories++;
-      eod.ofsetofcentraldirectoryrelativetostartofarchiv += ofs;
-      eod.sizeofcentraldirectory += sizeof(CDFH) + CDFH.fname_len;
-
-      i++;
-      //}
-      file = file.openNextFile();
-    }
-
-    //    Serial.print("EOD: ");
-    WriteChunk((char *)&eod, sizeof(eod));
-    //    Serial.println();
-  }
-
-  const char *endchunk = "0\r\n\r\n";
-  fileManager->client().write(endchunk, 5);
-
-  fileManager->sendContent("");
-  delay(1);
-}
-
 //*****************************************************************************************************
 String ESPFMfGK::DeUmlautFilename(String fn)
 { // cp437/cp850 to ...
@@ -1561,16 +1314,3 @@ uint64_t ESPFMfGK::usedBytes(fs::FS *fs)
     return -1;
   }
 }
-
-//*****************************************************************************************************
-/*
-
-  // +--++--++--++--++--++--++--++--++--++--++--++--++--++--++--+
-  // one arg, "za", zip all and download
-  if ( (fileManager->args() == 1) && (fileManager->argName(0) == "za") ) {
-    getAllFilesInOneZIP();
-    // does it all
-    return;
-  }
-  }
-*/

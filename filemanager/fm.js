@@ -601,9 +601,13 @@ function msgline(msg) {
 }
 
 //000000000000000000000000000
-function downloadall() {
-    msgline("Sending all files in one zip.");
-    window.location.href = "/c?za=all";
+function downloadall(param) {
+    if (param==0) {
+      msgline("Sending this folder in one zip file.");
+    } else {
+      msgline("Sending all files in one zip file.");
+    }
+    window.location.href = "/job?fs=" + getFileSystemIndex() + "&job=dwnldll&fn=dummy&folder=" + foldername;
     msgline("");
 }
 

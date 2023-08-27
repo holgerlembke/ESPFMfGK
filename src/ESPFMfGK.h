@@ -10,6 +10,8 @@
   Changes
     V1.7
      + preview-fenster-titel transparenz optimiert
+     + Redesign ZIP-Schnittstelle, Verlagerung in eigenen .h/.cpp wg. Sourcecodeumfangsverminderung 
+     + some sendContent-collector-speedups
 
     V1.6
      + WebPageTitle to set the pweb page title
@@ -33,37 +35,7 @@
      x more fancy web gui: Prozent-Anzeigen! (Mainly because SD is so slow...)
      x implemented a basic concept to dynamically add html/css-content and handle URL clicks
 
-    V1.03
-     x removed all SPIFFS from ESP32 version, switched fully to LittleFS
-     x fixed rename+delete for ESP32+LittleFS (added "/")
-
-    V1.02
-     x fixed the way to select the file system by conditional defines
-
-    V1.01
-     + added file name progress while uploading
-     x fixed error in ZIP file structure (zip.bitflags needs a flag)
-
-    V1.00
-     + out of V0.9998...
-     + ESP8266: LittleFS is default
-     + javascript: added "msgline();"
-     + javascript: added "Loading..." as a not-working-hint to show that Javascript is disabled
-     + cleaning up the "/"-stuff (from SPIFF with leading "/" to LittleFS without...)
-     + Warning: esp8266 2.7.4 has an error in mime::getContentType(path) for .TXT. Fix line 65 is { kTxtSuffix, kTxt },
-     + review of "edit file", moved some stuff to ESPxWebFlMgrWpF.h
-
-    V0.9998
-     + Renamed to ESPxWebFlMgr and made it work with esp32 and esp8266
-     + separated file manager web page, "build script" to generate it
-
-    V0.7
-     + "Download all files" creates a zip file from all files and downloads it
-     + option to set background color
-     - html5 fixes
-
-    V0.6
-     + Public Release on https://github.com/holgerlembke/ESP8266WebFlMgr
+   V1.x formerly known as ESPxWebFlMgr     
 */
 
 #include <Arduino.h>
@@ -178,10 +150,6 @@ private:
   void fileManagerDownload(String &filename);
   void servefile(String uri);
   void Illegal404();
-
-  // Zip-File uncompressed/stored
-  void getAllFilesInOneZIP(void);
-  int WriteChunk(const char *b, size_t l);
 
   // Hlpr für die Verwaltung, was angezeigt werden soll
   static const int8_t maxfilesystems = 4;                             // !!!!!!!

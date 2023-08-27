@@ -52,7 +52,7 @@ static const char ESPFMfGKWpindexpage[] PROGMEM = R"==x==(
     </div>
 
     <div class="u1">&nbsp;</div>
-    <div class="u2" onclick="downloadall();">Download all files</div>
+    <div class="u2">Download&nbsp;<span class="s1" onclick="downloadall(1);">all files</span>&nbsp;<span class="s2" onclick="downloadall(0);">this folder</span></div>
     <div class="u3" id="msg">Loading...</div>
     <div class="u4">&nbsp;</div>
     <div class="c" id="ca">
@@ -687,9 +687,13 @@ function msgline(msg) {
 }
 
 //000000000000000000000000000
-function downloadall() {
-    msgline("Sending all files in one zip.");
-    window.location.href = "/c?za=all";
+function downloadall(param) {
+    if (param==0) {
+      msgline("Sending this folder in one zip file.");
+    } else {
+      msgline("Sending all files in one zip file.");
+    }
+    window.location.href = "/job?fs=" + getFileSystemIndex() + "&job=dwnldll&fn=dummy&folder=" + foldername;
     msgline("");
 }
 
@@ -987,7 +991,6 @@ div {
 
 .u2 {
   grid-area: u2;
-  cursor: pointer;
   background-color: #CC6666;
   margin-top: 0px;
   padding-left: 10px;
@@ -995,8 +998,16 @@ div {
   font-size: 80%;
 }
 
-.u2:hover {
+.u2 .s1, .u2 .s2 {
+  cursor: pointer;
+  height: 100%;
+  padding: 0 2px 0 2px;
+  display: inline-block;
+}
+
+.u2 .s1:hover, .u2 .s2:hover {
   background-color: #9999FF;
+  border-radius: 2px;
   color: white;
 }
 

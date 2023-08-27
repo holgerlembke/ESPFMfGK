@@ -1,4 +1,3 @@
-// inline guard. Still broken by design?
 #ifndef ESPFMfGKWpF2_h
 #define ESPFMfGKWpF2_h
 

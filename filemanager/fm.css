@@ -161,7 +161,6 @@ div {
 
 .u2 {
   grid-area: u2;
-  cursor: pointer;
   background-color: #CC6666;
   margin-top: 0px;
   padding-left: 10px;
@@ -169,8 +168,16 @@ div {
   font-size: 80%;
 }
 
-.u2:hover {
+.u2 .s1, .u2 .s2 {
+  cursor: pointer;
+  height: 100%;
+  padding: 0 2px 0 2px;
+  display: inline-block;
+}
+
+.u2 .s1:hover, .u2 .s2:hover {
   background-color: #9999FF;
+  border-radius: 2px;
   color: white;
 }
 
