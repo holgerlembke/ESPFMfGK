@@ -12,9 +12,10 @@
      + preview-fenster-titel transparenz optimiert
      + Redesign ZIP-Schnittstelle, Verlagerung in eigenen .h/.cpp wg. Sourcecodeumfangsverminderung 
      + some sendContent-collector-speedups
+     + release as 2.0.2
 
     V1.6
-     + WebPageTitle to set the pweb page title
+     + WebPageTitle to set the web page title
      + das Konzept für beliebige Dateisysteme steht
      + nur noch Support für ESP32-Familie
      + Neuer Name: ESP32 File Manager for Generation Klick aka ESPFMfGK

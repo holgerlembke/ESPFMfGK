@@ -166,7 +166,7 @@ int ESPFMfGKGa::WriteChunk(const char *b, size_t l)
 */
 void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
 {
-  const int copybuffersize = 1000;
+  const int copybuffersize = 4 * 512; // Any suggestion about optimal size?
 
   fileManager->setContentLength(CONTENT_LENGTH_UNKNOWN);
   // fileManager->sendHeader(F("Content-Type"), F("text/text"));
@@ -227,6 +227,9 @@ void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
 
   // Pass 1: local headers + file
   {
+    uint8_t * copybuffer;
+    copybuffer = new uint8_t[copybuffersize];
+
     zipFileHeader zip;
     zip.signature = 0x04034b50;
     zip.versionneeded = 0;
@@ -246,7 +249,7 @@ void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
       {
         if (!file.isDirectory())
         {
-          String fn = file.name();
+          String fn = file.path();
 
           if (checkFileFlags != NULL)
           {
@@ -281,15 +284,14 @@ void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
 
             { // pff.
               CRC32 crc;
-              byte b[copybuffersize];
               size_t r;
               do
               {
-                r = file.read(b, copybuffersize);
+                r = file.read(copybuffer, copybuffersize);
                 if (r > 0)
                 {
-                  crc.update(b, r);
-                  fileManager->client().write(b, r);
+                  crc.update(copybuffer, r);
+                  fileManager->client().write(copybuffer, r);
                 }
               } while (r == copybuffersize);
               datadiscr.crc32 = crc.finalize();
@@ -305,6 +307,7 @@ void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
       }
       folderi = folderi->next;
     }
+    delete[] copybuffer;
   }
 
   // Pass 2: Central directory Structur
@@ -345,7 +348,7 @@ void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
       {
         if (!file.isDirectory())
         {
-          String fn = file.name();
+          String fn = file.path();
 
           if (checkFileFlags != NULL)
           {

@@ -10,6 +10,10 @@
     https://github.com/holgerlembke/ESPFMfGK
     lembke@gmail.com
 
+  V1.0.1
+    + Copybuffer auf Zeiger umgestellt, Größe auf Mehrfaches von Sektorgröße
+    + speichert Ordnerstrukturen
+
   V1.0
     + Redesign ZIP-Schnittstelle, Verlagerung in eigenen .h/.cpp wg. Sourcecodeumfangsverminderung 
     + Auslagerung aus ESPFMfGK.h
