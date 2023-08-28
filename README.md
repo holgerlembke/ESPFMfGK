@@ -51,7 +51,7 @@ Opens a preview window for the file. It depends on what the browser can display,
 
 ### Download all files
 
-Broken. Work for later.
+Easiest way to get all the log files from any device: Download all files from a device. Or all files from a folder including its sub-folders. Into one big ZIP file. 
 
 # Usage
 

@@ -8,6 +8,10 @@
     lembke@gmail.com
 
   Changes
+    V1.8
+     + Arduino-release V2.0.8
+
+  Changes
     V1.7
      + preview-fenster-titel transparenz optimiert
      + Redesign ZIP-Schnittstelle, Verlagerung in eigenen .h/.cpp wg. Sourcecodeumfangsverminderung 
@@ -59,7 +63,7 @@
 
      For compatibility reasons, the fileManagerServerStaticsInternally is activated by default.
 */
-#define fileManagerServerStaticsInternally
+// #define fileManagerServerStaticsInternally
 // #define fileManagerServerStaticsInternallyDeflate
 
 
