@@ -38,6 +38,9 @@ File name syntax can be:
 
 Deviceindex follows the order of ESPFMfGK::AddFS calls, 0...n-1.
 
+Above screenshot shows an example: FFat is device 0, SD-Card is device 1. To move a file from FFAT to SD-Card
+simply click on (R)ename and add a 1: at the start of the filename.
+
 ### Edit
 
 Lets edit a file! Works well for everything that is editable.
