@@ -2,3 +2,6 @@
 *.html linguist-language=html
 *.css linguist-language=CascadingStyleSheets
 *.ino linguist-language=C++
+*.c linguist-language=C++
+*.cpp linguist-language=C++
+*.h linguist-language=C++

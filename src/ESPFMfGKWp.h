@@ -10,76 +10,95 @@ static const char ESPFMfGKWpindexpage[] PROGMEM = R"==x==(
 <html lang="en">
 
 <head>
-  <title>FileManager</title>
-  <meta charset="utf-8" />
-  <link rel="stylesheet" type="text/css" href="/fm.css">
-  <script src="/fm.js"></script>
+    <title>FileManager</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="/fm.css">
+    <script src="/fm.js"></script>
 </head>
 
 <body class="background">
-  <div id="gc">
-    <div class="o1">
-      <svg id="wait" width="30" height="30" style="border: 1px solid #9999CC; background-color:#9999CC; ">
-        <circle stroke="#CC6699" stroke-width="1" r="10" cx="15" cy="15" fill="#9999CC" />
-        <circle id="dot" r="5" cx="7.5" cy="7.5" fill="#FF9966" />
-        <animateTransform href="#dot" attributeName="transform" type="rotate" from="0 15 15" to="360 15 15" dur="3s" repeatCount="indefinite" />
-      </svg>
-    </div>
-    <!-- <div class="o2" id="o2">&nbsp;</div> -->
-    <div class="o2" id="o2">
-      <div id="o2i1">&nbsp;</div>
-      <div id="o2i2" title="Create an empty file" onclick="makeemptyfile();">&nbsp;&#xFF0B;&nbsp;</div>      
-    </div>
-    <div class="o3" id="o3">&nbsp;</div>
-    <div class="o4">&nbsp;</div>
+    <div id="gc">
+        <div class="o1">
+            <svg id="wait" width="30" height="30" style="border: 1px solid #9999CC; background-color:#9999CC; ">
+                <circle stroke="#CC6699" stroke-width="1" r="10" cx="15" cy="15" fill="#9999CC" />
+                <circle id="dot" r="5" cx="7.5" cy="7.5" fill="#FF9966" />
+                <animateTransform href="#dot" attributeName="transform" type="rotate" from="0 15 15" to="360 15 15" dur="3s" repeatCount="indefinite" />
+            </svg>
+        </div>
+        <!-- <div class="o2" id="o2">&nbsp;</div> -->
+        <div class="o2" id="o2">
+            <div id="o2i1">&nbsp;</div>
+            <div id="o2i2" title="Create an empty file" onclick="makeemptyfile();">&nbsp;&#xFF0B;&nbsp;</div>
+        </div>
+        <div class="o3" id="o3">&nbsp;</div>
+        <div class="o4">&nbsp;</div>
 
-    <div class="m1">
-      <div class="s11">&nbsp;</div>
-      <div class="s12">
-        <div class="s13 background">&nbsp;</div>
-      </div>
-    </div>
-    <div class="m2" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-      File<br />
-      Drop<br />
-      Zone<br />
-    </div>
-    <div class="m3">
-      <div class="s31">&nbsp;</div>
-      <div class="s32">
-        <div class="s33 background">&nbsp;</div>
-      </div>
-    </div>
+        <div class="m1">
+            <div class="s11">&nbsp;</div>
+            <div class="s12">
+                <div class="s13 background">&nbsp;</div>
+            </div>
+        </div>
+        <div class="m2" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+            File<br />
+            Drop<br />
+            Zone<br />
+        </div>
+        <div class="m3">
+            <div class="s31">&nbsp;</div>
+            <div class="s32">
+                <div class="s33 background">&nbsp;</div>
+            </div>
+        </div>
 
-    <div class="u1">&nbsp;</div>
-    <div class="u2">Download&nbsp;<span class="s1" onclick="downloadall(1);">all files</span>&nbsp;<span class="s2" onclick="downloadall(0);">this folder</span></div>
-    <div class="u3" id="msg">Loading...</div>
-    <div class="u4">&nbsp;</div>
-    <div class="c" id="ca">
-      <div id="pi">
-        Path name should appear here.
-      </div>
-      <div>
-        <div id="ti">
-          Tree List should appear here.
+        <div class="u1">&nbsp;</div>
+        <div class="u2"><span class="s1" onclick="downloadmgr();">Download all files</span></div>
+        <div class="u3" id="msg">Loading...</div>
+        <div class="u4">&nbsp;</div>
+        <div class="c" id="ca">
+            <div id="pi">
+                Path name should appear here.
+            </div>
+            <div>
+                <div id="ti">
+                    Tree List should appear here.
+                </div>
+                <div id="fi">
+                    File list should appear here.
+                </div>
+                <div id="ei">
+                    Editor should appear here.
+                </div>
+                <div id="pv">
+                    Preview should appear here.
+                </div>
+            </div>
         </div>
-        <div id="fi">
-          File list should appear here.
-        </div>
-        <div id="ei">
-          Editor should appear here.
-        </div>
-        <div id="pv">
-          Preview should appear here.
-        </div>
-      </div>
     </div>
-  </div>
-  <div id="foot"></div>
+    <div id="foot"></div>
+
+    <dialog id="prompt">
+        <div>
+            <div class="windowtitle">
+                <div id="wt" class="t">%t%</div>
+                <div class="g"></div>
+                <div id="dclose" class="windowclose"> </div>
+            </div>
+            <div class="windowcontent">
+
+                <div id="windowform"></div>
+
+                <button id="dok" class="bok">OK</button> 
+                <button id="dcancel" class="bcancel">Cancel</button><br>
+
+                <input type="hidden" id="result" value="">
+            </div>
+        </div>
+    </dialog>
+
 </body>
 
 </html>
-
   )==x==";
 
 static const char ESPFMfGKWpjavascript[] PROGMEM = R"==x==(
@@ -94,25 +113,40 @@ var elementti = null;
 var elementpi = null;
 var elementws = null;
 
-var sektionstrenner = String.fromCharCode(3, 1, 2);
-var antworttrenner = String.fromCharCode(2, 1, 3);
-var itemtrenner = String.fromCharCode(2, 1, 4);
-var bootinfotrenner = String.fromCharCode(2, 1, 7);
+const sektionstrenner = String.fromCharCode(3, 1, 2);
+const antworttrenner = String.fromCharCode(2, 1, 3);
+const itemtrenner = String.fromCharCode(2, 1, 4);
+const bootinfotrenner = String.fromCharCode(2, 1, 7);
 
 var foldername = "";
 var windowcounter = 0;
+var filesysteminfos = "";
 
-var pathinsertintro =
+const pathinsertintro =
     "<div id=\"pl\"><div class=\"po1\"></div><div class=\"po2\"><div></div></div><div class=\"po3\"></div><div class=\"po4\"><div>";
 
-var pathinsertextro =
+const pathinsertextro =
     "</div></div><div class=\"po5\"></div><div class=\"po6\"><div></div></div><div class=\"po7\"></div>" +
     "<div class=\"pu1\"></div><div class=\"pu2\"></div><div class=\"pu3\"></div><div class=\"pu4\">&nbsp;</div>" +
     "<div class=\"pu5\"></div><div class=\"pu6\"></div><div class=\"pu7\"></div></div>";
 
-var windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div><div class=\"g\"></div>"+
-"<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>"+
-"<div class=\"windowgrip\">:::</div></div>";
+const folderdownloadinsert =
+    "<label><input type=\"radio\" name=\"a\" value=\"1\"> all files on device</label><br>" +
+    "<label><input type=\"radio\" name=\"a\" value=\"2\"> this folder</label><br>" +
+    "<label><input type=\"radio\" name=\"a\" value=\"3\"> this folder and subfolders</label><br>";
+
+const filerenameinsert =
+    "New name:<br><input id=\"newname\" length=\"200\"><p><input type=\"hidden\" id=\"oldname\">" +
+    "Changing the path will move the file. Start with file system number to move to other device.<br>" +
+    "Active filesystems are: %f%.<br>" +
+    "Example: 1:/path/path/filename.extention</p>";
+
+const filedeleteinsert =
+    "Delete file <i>%f%</i>?<br><input type=\"hidden\" id=\"filename\"><p><br>Deleting files is final.</p>";
+
+const windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div><div class=\"g\"></div>" +
+    "<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>" +
+    "<div class=\"windowgrip\">:::</div></div>";
 
 //000000000000000000000000000
 function compressurlfile(source) {
@@ -124,7 +158,7 @@ function compressurlfile(source) {
 
     msgline("Fetching file...");
     var request = new XMLHttpRequest();
-    request.onprogress = function (evt) {
+    request.onprogress = function(evt) {
         if (evt.lengthComputable) {
             var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
             if (lastpercentComplete != percentComplete) {
@@ -133,7 +167,7 @@ function compressurlfile(source) {
             }
         }
     }
-    request.onreadystatechange = function () {
+    request.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             var data = this.responseText;
@@ -148,7 +182,7 @@ function compressurlfile(source) {
 
             msgline("Sending compressed file...");
             var sendback = new XMLHttpRequest();
-            sendback.upload.onprogress = function (evt) {
+            sendback.upload.onprogress = function(evt) {
                 if (evt.lengthComputable) {
                     var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
                     if (lastpercentComplete != percentComplete) {
@@ -157,7 +191,7 @@ function compressurlfile(source) {
                     }
                 }
             }
-            sendback.onreadystatechange = function () {
+            sendback.onreadystatechange = function() {
                 var DONE = this.DONE || 4;
                 if (this.readyState === DONE) {
                     getfileinsert();
@@ -191,7 +225,7 @@ function getFileSystemIndex() {
 //000000000000000000000000000
 function executecommand(command) {
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
+    xhr.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             getfileinsert();
@@ -274,17 +308,17 @@ function AnswerProcessor() {
                     p += "<span class=\"fneba\" onclick=\"showfolder(" + (-1) + ",'/');\">\u25B2</span>&nbsp;&nbsp;/";
                     skip = true;
                 } else
-                    if (level == -2) { // current folder name
-                        fullpath = entry[1]; 
-                        var fp = "";
-                        for (var k=1;k<pathitems.length;k++) {
-                           fp += "/"+pathitems[k];
-                           p += "<span class=\"fneba\" onclick=\"showfolder(" + (-1) + ",'" + fp + "');\">"+ pathitems[k] +"</span>/";
-                        }
-                        skip = true;
-                    } else {
-                        s += "<div class=\"fne\" onclick=\"showfolder(" + (level + 1) + ",'" + entry[1] + "');\">";
+                if (level == -2) { // current folder name
+                    fullpath = entry[1];
+                    var fp = "";
+                    for (var k = 1; k < pathitems.length; k++) {
+                        fp += "/" + pathitems[k];
+                        p += "<span class=\"fneba\" onclick=\"showfolder(" + (-1) + ",'" + fp + "');\">" + pathitems[k] + "</span>/";
                     }
+                    skip = true;
+                } else {
+                    s += "<div class=\"fne\" onclick=\"showfolder(" + (level + 1) + ",'" + entry[1] + "');\">";
+                }
 
                 if (!skip) {
                     var level = parseInt(entry[0]);
@@ -359,16 +393,16 @@ function AnswerProcessor() {
 
             // Makros aufloesen
             // Displayname ist umstaendlich, weil die Datenhaltung etwas umstaendlich ist
-            if (fullpath!="") {
-              var fdp = "";
-              if (fullpath=="/") {
-                fdp = items[c + 1].substring(1);
-              } else {
-                fdp = items[c + 1].substring(fullpath.length+1);
-              }
-              s = s.replaceAll("%fd", fdp);
-            } else {    
-              s = s.replaceAll("%fd", items[c + 1]);
+            if (fullpath != "") {
+                var fdp = "";
+                if (fullpath == "/") {
+                    fdp = items[c + 1].substring(1);
+                } else {
+                    fdp = items[c + 1].substring(fullpath.length + 1);
+                }
+                s = s.replaceAll("%fd", fdp);
+            } else {
+                s = s.replaceAll("%fd", items[c + 1]);
             }
             s = s.replaceAll("%fn", items[c + 0]);
             s = s.replaceAll("%fs", items[c + 2]);
@@ -406,21 +440,26 @@ function BootAnswerProcessor() {
         // console.log('Bootinfos: '+res.length);
 
         // ESPxWebFlMgr2::Backgroundcolor
-        if ((res.length>=1) && (res[0] != "")) {
+        if ((res.length >= 1) && (res[0] != "")) {
             var c = document.getElementsByClassName('background');
             for (i = 0; i < c.length; i++) {
                 c[i].style.backgroundColor = res[0];
             }
         }
         // ESPxWebFlMgr2::ExtraHTMLfoot
-        if ((res.length>=2) && (res[1] != "")) {
+        if ((res.length >= 2) && (res[1] != "")) {
             var d = document.getElementById("foot");
             d.innerHTML = res[1];
         }
 
         // Seitentitle
-        if ((res.length>=3) && (res[2] != "")) {
-           document.title = res[2];
+        if ((res.length >= 3) && (res[2] != "")) {
+            document.title = res[2];
+        }
+
+        // Filesysteminfo
+        if ((res.length >= 4) && (res[3] != "")) {
+            filesysteminfos = res[3];
         }
 
         // und nun kann die Dateiliste geholt werden
@@ -440,26 +479,9 @@ function downloadfile(filename) {
 }
 
 //000000000000000000000000000
-function deletefile(filename) {
-    if (confirm("Really delete " + filename)) {
-        msgline("Please wait. Delete in progress...");
-        executecommand("job=del&fn=" + filename);
-    }
-}
-
-//000000000000000000000000000
 function makeemptyfile(filename) {
     msgline("Please wait. Create new empty file...");
     executecommand("job=createnew&fn=" + foldername + "/newfile");
-}
-
-//000000000000000000000000000
-function renamefile(filename) {
-    var newname = prompt("new name for " + filename, filename);
-    if (newname != null) {
-        msgline("Please wait. Rename in progress...");
-        executecommand("job=ren&fn=" + filename + "&new=" + newname);
-    }
 }
 
 //000000000000000000000000000
@@ -468,13 +490,13 @@ function previewfile(filename) {
 
     var previewxhr = new XMLHttpRequest();
     previewxhr.responseType = "blob";
-    previewxhr.onreadystatechange = function () {
+    previewxhr.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             var newwin = windowhtml;
 
-            var winid = "win"+windowcounter;
-            newwin = newwin.replaceAll("%i%", "win"+windowcounter);
+            var winid = "win" + windowcounter;
+            newwin = newwin.replaceAll("%i%", "win" + windowcounter);
             newwin = newwin.replaceAll("%t%", filename);
             var elem = document.createRange().createContextualFragment(newwin);
             document.body.appendChild(elem);
@@ -482,26 +504,26 @@ function previewfile(filename) {
             // console.log(previewxhr.getResponseHeader('content-type'));
             // alles furchtbar umständlich, weil bilder nur als BLOB funktionieren und Text daher wieder aus dem Blob gelesen werden muss... 
 
-            var content = document.querySelector("#"+winid+" .windowcontent");
-            var dragger = document.querySelector("#"+winid+" .windowtitle");
-            var winid = '#'+"win"+windowcounter;
+            var content = document.querySelector("#" + winid + " .windowcontent");
+            var dragger = document.querySelector("#" + winid + " .windowtitle");
+            var winid = '#' + "win" + windowcounter;
             var node = document.querySelector(winid);
 
             if (previewxhr.getResponseHeader('content-type').startsWith("image/")) {
-              var image = new Image();
-              image.src = URL.createObjectURL(previewxhr.response);
-              content.appendChild(image);
-              makeDraggable(node);
-            } else {
-              content.style.whiteSpace = "pre";
-              const reader = new FileReader();
-              reader.addEventListener('loadend', (e) => {
-                content.textContent = e.srcElement.result;
-                // Warten, bis Content vollständig ASYNC!
+                var image = new Image();
+                image.src = URL.createObjectURL(previewxhr.response);
+                content.appendChild(image);
                 makeDraggable(node);
-              });
-              reader.readAsText(previewxhr.response);
-            }             
+            } else {
+                content.style.whiteSpace = "pre";
+                const reader = new FileReader();
+                reader.addEventListener('loadend', (e) => {
+                    content.textContent = e.srcElement.result;
+                    // Warten, bis Content vollständig ASYNC!
+                    makeDraggable(node);
+                });
+                reader.readAsText(previewxhr.response);
+            }
 
             windowcounter++;
             msgline("");
@@ -519,7 +541,7 @@ function editfile(filename) {
     msgline("Please wait. Creating editor...");
 
     var editxhr = new XMLHttpRequest();
-    editxhr.onreadystatechange = function () {
+    editxhr.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             hidepathtree();
@@ -530,8 +552,8 @@ function editfile(filename) {
             elemento3.innerHTML = "Edit " + filename;
 
             var elem = document.getElementById("tect");
-            elem.style.height = (window.innerHeight-120)+"px";
-            elem.style.width = (window.innerWidth-150)+"px";
+            elem.style.height = (window.innerHeight - 120) + "px";
+            elem.style.width = (window.innerWidth - 150) + "px";
 
             msgline("");
             waitspinner(false);
@@ -567,7 +589,7 @@ function sved(filename) {
 
     // ajax does not do xhr.setRequestHeader("Content-length", body.length);
 
-    xhr.onreadystatechange = function () {
+    xhr.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             elementei.innerHTML = "";
@@ -598,7 +620,7 @@ function uploadFile(file, islast) {
     var xhr = new XMLHttpRequest();
     lastpercentComplete = -1;
     xhr.upload.onprogress = progressfunc;
-    xhr.onreadystatechange = function () {
+    xhr.onreadystatechange = function() {
         // console.log(xhr.status);
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
@@ -687,30 +709,22 @@ function msgline(msg) {
 }
 
 //000000000000000000000000000
-function downloadall(param) {
-    if (param==0) {
-      msgline("Sending this folder in one zip file.");
-    } else {
-      msgline("Sending all files in one zip file.");
-    }
-    window.location.href = "/job?fs=" + getFileSystemIndex() + "&job=dwnldll&fn=dummy&folder=" + foldername;
-    msgline("");
-}
-
-//000000000000000000000000000
 function makeDraggable(box) {
-    let cX = 0, cY = 0, pX = 0, pY = 0;
+    let cX = 0,
+        cY = 0,
+        pX = 0,
+        pY = 0;
 
     box.setAttribute("floater", "true");
     box.classList.add("windowstyle");
     let content = box.querySelector('.windowcontent');
     if (content) {
-      if (content.clientHeight>window.innerHeight) {
-        content.style.height=window.innerHeight/2+"px";
-      }
-      if (content.clientWidth>window.innerWidth) {
-        content.style.width=window.innerWidth/2+"px";
-      }
+        if (content.clientHeight > window.innerHeight) {
+            content.style.height = window.innerHeight / 2 + "px";
+        }
+        if (content.clientWidth > window.innerWidth) {
+            content.style.width = window.innerWidth / 2 + "px";
+        }
     }
 
     let title = box.querySelector('.windowtitle');
@@ -793,8 +807,8 @@ function makeDraggable(box) {
         box.style.width = e.pageX - box.getBoundingClientRect().left + 'px';
         box.style.height = e.pageY - box.getBoundingClientRect().top + 'px';
         if (content) {
-          content.style.width = e.pageX - content.getBoundingClientRect().left + 'px';
-          content.style.height = e.pageY - content.getBoundingClientRect().top + 'px';
+            content.style.width = e.pageX - content.getBoundingClientRect().left + 'px';
+            content.style.height = e.pageY - content.getBoundingClientRect().top + 'px';
         }
     }
 
@@ -802,6 +816,111 @@ function makeDraggable(box) {
         document.removeEventListener('mouseup', endResize);
         document.removeEventListener('mousemove', resize);
     }
+}
+
+//000000000000000000000000000
+//000000000000000000000000000
+function deletefile(filename) {
+    var fri = filedeleteinsert;
+    fri = fri.replaceAll("%f%", filename);
+    showdialog(deletefileinit, deletefileanalyzer, fri, "Delete file", filename);
+}
+
+//000000000000000000000000000
+function deletefileinit(formdata) {
+    document.getElementById("filename").value = formdata;
+}
+
+//000000000000000000000000000
+function deletefileanalyzer(formdata) {
+    var filename = document.getElementById("filename").value;
+
+    msgline("Please wait. Delete in progress...");
+    executecommand("job=del&fn=" + filename);
+}
+
+//000000000000000000000000000
+//000000000000000000000000000
+function renamefile(filename) {
+    var fri = filerenameinsert;
+    fri = fri.replaceAll("%f%", filesysteminfos);
+    showdialog(renamefileinit, renamefileanalyzer, fri, "Rename/Move file", filename);
+}
+
+//000000000000000000000000000
+function renamefileinit(formdata) {
+    document.getElementById("newname").value = formdata;
+    document.getElementById("oldname").value = formdata;
+}
+
+//000000000000000000000000000
+function renamefileanalyzer(formdata) {
+    var filename = document.getElementById("finame").value;
+
+    msgline("Please wait. Rename in progress...");
+    executecommand("job=ren&fn=" + oldname + "&new=" + newname);
+}
+
+//000000000000000000000000000
+//000000000000000000000000000
+function downloadmgrresanalyzer() {
+    var radios = document.getElementsByTagName('input');
+    var value = 0;
+    for (var i = 0; i < radios.length; i++) {
+        if (radios[i].type === 'radio' && radios[i].checked) {
+            value = radios[i].value;
+        }
+    }
+
+    if (value > 0) {
+        window.location.href = "/job?fs=" + getFileSystemIndex() + "&job=dwnldll&mode=" + value + "&fn=dummy&folder=" + foldername;
+    }
+}
+
+//000000000000000000000000000
+function downloadmgr() {
+    showdialog(0, downloadmgrresanalyzer, folderdownloadinsert, "Download files");
+}
+
+
+//000000000000000000000000000
+//000000000000000000000000000
+function showdialog(initcall, okcall, dialogitems, title, formdata) {
+    var dialog = document.getElementById("prompt");
+    var result = document.getElementById("result");
+
+    var html = document.getElementById("windowform");
+    html.innerHTML = dialogitems;
+    html = document.getElementById("wt");
+    html.innerHTML = title;
+
+    if (initcall) {
+        initcall(formdata);
+    }
+
+    document.getElementById("dok")
+        .addEventListener("click", () => {
+            result.value = "ok";
+            dialog.close();
+            if (okcall) {
+                okcall();
+            }
+        });
+
+    document.getElementById("dcancel")
+        .addEventListener("click", () => {
+            result.value = "cancel";
+            dialog.close();
+        });
+
+    document.getElementById("dclose")
+        .addEventListener("click", () => {
+            result.value = "cancel";
+            dialog.close();
+        });
+
+    // Async!
+    dialog.showModal();
 }
 
 //000000000000000000000000000
@@ -829,416 +948,420 @@ window.onload = boot;
 static const char ESPFMfGKWpcss[] PROGMEM = R"==g==(
 
 .background {
-  background-color: black;
+    background-color: black;
 }
 
 div {
-  margin: 1px;
-  padding: 0;
-  font-family: 'Segoe UI', Verdana, sans-serif;
+    margin: 1px;
+    padding: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
 }
 
 #gc {
-  display: grid;
-  grid-template-columns: 80px 25% auto 30px;
-  grid-template-rows: 25px 30px auto 30px 20px;
-  grid-template-areas: "o1 o2 o3 o4""m1 c c c""m2 c c c""m3 c c c""u1 u2 u3 u4";
+    display: grid;
+    grid-template-columns: 80px 25% auto 30px;
+    grid-template-rows: 25px 30px auto 30px 20px;
+    grid-template-areas: "o1 o2 o3 o4""m1 c c c""m2 c c c""m3 c c c""u1 u2 u3 u4";
 }
 
 #wait {
-  position: relative;
-  top: 10px;
-  left: 15px;
-  visibility: collapse;
+    position: relative;
+    top: 10px;
+    left: 15px;
+    visibility: collapse;
 }
 
 #ca, #ta, #ti, #pi, #fi {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #ca {}
 
 #ti {
-  float: left;
+    float: left;
 }
 
 #fi {}
 
 #ei, #pv {
-  display: none;
+    display: none;
 }
 
 .o1 {
-  grid-area: o1;
-  background-color: #9999CC;
-  border-top-left-radius: 20px;
-  margin-bottom: 0px;
+    grid-area: o1;
+    background-color: #9999CC;
+    border-top-left-radius: 20px;
+    margin-bottom: 0px;
 }
 
 .o2 {
-  grid-area: o2;
-  background-color: #9999FF;
-  margin-bottom: 0px;
-  white-space: nowrap;
-  display: grid; 
-  grid-auto-rows: 1fr; 
-  grid-template-columns: 1fr 20px; 
-  gap: 0px 0px; 
+    grid-area: o2;
+    background-color: #9999FF;
+    margin-bottom: 0px;
+    white-space: nowrap;
+    display: grid;
+    grid-auto-rows: 1fr;
+    grid-template-columns: 1fr 20px;
+    gap: 0px 0px;
 }
 
 #o2i2 {
-  background-color: #BBB2FF;
-  margin: 0;
-  padding: 0;
-  cursor: default;
-  color: white;
+    background-color: #BBB2FF;
+    margin: 0;
+    padding: 0;
+    cursor: default;
+    color: white;
 }
 
 #o2i2:hover {
-  background-color: #D36669;
-  color: black;
+    background-color: #D36669;
+    color: black;
 }
 
 .o2 select {
-  border: 0px;
-  color: white;
-  font-weight: bold;
-  background-color: transparent;
+    border: 0px;
+    color: white;
+    font-weight: bold;
+    background-color: transparent;
 }
 
 .o2 option {
-  border: 0px;
-  color: black;
-  background-color: white;
+    border: 0px;
+    color: black;
+    background-color: white;
 }
 
 .o2 label {
-  color: white;
+    color: white;
 }
 
 .o3 {
-  grid-area: o3;
-  background-color: #CC99CC;
-  margin-bottom: 0px;
-  white-space: nowrap;
+    grid-area: o3;
+    background-color: #CC99CC;
+    margin-bottom: 0px;
+    white-space: nowrap;
 }
 
 .o4 {
-  grid-area: o4;
-  background-color: #CC6699;
-  border-radius: 0 10px 10px 0;
-  margin-bottom: 0px;
+    grid-area: o4;
+    background-color: #CC6699;
+    border-radius: 0 10px 10px 0;
+    margin-bottom: 0px;
 }
 
 .m1 {
-  grid-area: m1;
-  margin-top: 0px;
-  background-color: #9999CC;
-  display: grid;
-  grid-template-columns: 60px 20px;
-  grid-template-rows: 20px;
-  grid-template-areas: "s11 s12";
+    grid-area: m1;
+    margin-top: 0px;
+    background-color: #9999CC;
+    display: grid;
+    grid-template-columns: 60px 20px;
+    grid-template-rows: 20px;
+    grid-template-areas: "s11 s12";
 }
 
 .s12 {
-  margin: 0px;
-  background-color: #9999CC;
+    margin: 0px;
+    background-color: #9999CC;
 }
 
 .s13 {
-  margin: 0px;
-  border-top-left-radius: 20px;
-  height: 30px;
+    margin: 0px;
+    border-top-left-radius: 20px;
+    height: 30px;
 }
 
 .m2 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  grid-area: m2;
-  background-color: #CC6699;
-  width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-area: m2;
+    background-color: #CC6699;
+    width: 60px;
 }
 
 .m3 {
-  grid-area: m3;
-  margin-bottom: 0px;
-  background-color: #9999CC;
-  display: grid;
-  grid-template-columns: 60px 20px;
-  grid-template-rows: 20px;
-  grid-template-areas: "s31 s32";
+    grid-area: m3;
+    margin-bottom: 0px;
+    background-color: #9999CC;
+    display: grid;
+    grid-template-columns: 60px 20px;
+    grid-template-rows: 20px;
+    grid-template-areas: "s31 s32";
 }
 
 .s32 {
-  margin: 0px;
-  background-color: #9999CC;
+    margin: 0px;
+    background-color: #9999CC;
 }
 
 .s33 {
-  margin: 0px;
-  border-bottom-left-radius: 20px;
-  height: 30px;
+    margin: 0px;
+    border-bottom-left-radius: 20px;
+    height: 30px;
 }
 
 .u1 {
-  grid-area: u1;
-  background-color: #9999CC;
-  border-bottom-left-radius: 20px;
-  margin-top: 0px;
+    grid-area: u1;
+    background-color: #9999CC;
+    border-bottom-left-radius: 20px;
+    margin-top: 0px;
 }
 
 .u2 {
-  grid-area: u2;
-  background-color: #CC6666;
-  margin-top: 0px;
-  padding-left: 10px;
-  vertical-align: middle;
-  font-size: 80%;
+    grid-area: u2;
+    background-color: #CC6666;
+    margin-top: 0px;
+    padding-left: 10px;
+    vertical-align: middle;
+    font-size: 80%;
 }
 
-.u2 .s1, .u2 .s2 {
-  cursor: pointer;
-  height: 100%;
-  padding: 0 2px 0 2px;
-  display: inline-block;
+.u2 .s1 {
+    cursor: pointer;
+    height: 100%;
+    padding: 0 4px 0 4px;
+    display: inline-block;
 }
 
-.u2 .s1:hover, .u2 .s2:hover {
-  background-color: #9999FF;
-  border-radius: 2px;
-  color: white;
+.u2 .s1:hover {
+    background-color: #9999FF;
+    border-radius: 2px;
+    color: white;
 }
 
 .u3 {
-  grid-area: u3;
-  padding-left: 10px;
-  background-color: #FF9966;
-  font-size: 80%;
-  margin-top: 0px;
+    grid-area: u3;
+    padding-left: 10px;
+    background-color: #FF9966;
+    font-size: 80%;
+    margin-top: 0px;
 }
 
 .u4 {
-  grid-area: u4;
-  background-color: #FF9900;
-  border-radius: 0 10px 10px 0;
-  margin-top: 0px;
+    grid-area: u4;
+    background-color: #FF9900;
+    border-radius: 0 10px 10px 0;
+    margin-top: 0px;
 }
 
 .c {
-  grid-area: c;
+    grid-area: c;
 }
 
 #fi button {
-  background-color: Transparent;
-  border: 1px solid #9999FF;
-  border-radius: 1px;
-  padding: 0px;
-  width: 30px;
-  cursor: pointer;
+    background-color: Transparent;
+    border: 1px solid #9999FF;
+    border-radius: 1px;
+    padding: 0px;
+    width: 30px;
+    cursor: pointer;
 }
 
 #fi button:hover {
-  background-color: #9999FF;
-  color: white;
+    background-color: #9999FF;
+    color: white;
 }
 
 .gc div {
-  padding: 1px;
+    padding: 1px;
 }
 
 .cc .uc {
-  background-color: green;
-  display: none;
+    background-color: green;
+    display: none;
 }
 
 .ccg, ccu {
-  height: 1.5em;
+    height: 1.5em;
 }
 
 .ccg {
-  background-color: #A5A5FF;
+    background-color: #A5A5FF;
 }
 
 .ccu {
-  background-color: #FE9A00;
+    background-color: #FE9A00;
 }
 
 .ccl {
-  border-radius: 5px 0 0 5px;
-  cursor: pointer;
+    border-radius: 5px 0 0 5px;
+    cursor: pointer;
 }
 
 .ccl:hover {
-  border-radius: 5px 0 0 5px;
-  color: white;
-  cursor: pointer;
+    border-radius: 5px 0 0 5px;
+    color: white;
+    cursor: pointer;
 }
 
 .ccr {
-  border-radius: 0 5px 5px 0;
+    border-radius: 0 5px 5px 0;
 }
 
 .cct {
-  text-align: right;
+    text-align: right;
 }
 
 .gc {
-  display: grid;
-  grid-template-columns: repeat(3, max-content);
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
 }
 
 .fnecc {
-  width: min-content;
-  margin: 0 1px;
-  padding-top: 2px;
-  display: grid;
-  grid-auto-rows: 1fr;
-  grid-template-columns: 1fr 1fr;
-  gap: 0px 0px;
+    width: min-content;
+    margin: 0 1px;
+    padding-top: 2px;
+    display: grid;
+    grid-auto-rows: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 0px 0px;
 }
 
 .fnegc {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(1, max-content);
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(1, max-content);
 }
 
 .fne {
-  margin: 1px 0px 2px 0px;
-  background-color: white;
+    margin: 1px 0px 2px 0px;
+    background-color: white;
 }
 
 .fnegc div {
-  padding: 1px;
+    padding: 1px;
 }
 
 .fnes {
-  padding: 0px 5px 0px 5px;
-  cursor: pointer;
-  border-radius: 5px;
+    padding: 0px 5px 0px 5px;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
 .fnesl {
-  border: 1px solid #EDC315;
-  background-color: #EDC315;
-  color: black;
+    border: 1px solid #EDC315;
+    background-color: #EDC315;
+    color: black;
 }
 
 .fnesl:hover {
-  border: 1px solid #EDC315;
-  background-color: #EDC315;
-  color: white;
+    border: 1px solid #EDC315;
+    background-color: #EDC315;
+    color: white;
 }
 
 .fnesa {
-  border: 1px solid #F8FBDB;
-  background-color: #F8FBDB;
-  color: #white;
+    border: 1px solid #F8FBDB;
+    background-color: #F8FBDB;
+    color: white;
 }
 
 /* back button */
 .fneba {
-  background-color: #EDC315;
-  border: 3px solid #EDC315;
-  border-radius: 4px;
-  padding: 0px 5px 0px 5px;
-  margin: 0;
-  font-size: 0.7em;
-  cursor: pointer;
+    background-color: #EDC315;
+    border: 3px solid #EDC315;
+    border-radius: 4px;
+    padding: 0px 5px 0px 5px;
+    margin: 0;
+    font-size: 0.7em;
+    cursor: pointer;
 }
 
 .fneba:hover {
-  color: white;
-  background-color: #9999FF;
-  border: 3px solid #9999FF;
-  border-radius: 4px;
+    color: white;
+    background-color: #9999FF;
+    border: 3px solid #9999FF;
+    border-radius: 4px;
 }
 
-// EditorInsert
+/* EditorInsert */
 #ei button {
-  white-space: nowrap; 
-  background-color: #F8FBDB;
-  border: 3px solid #F8FBDB;
-  border-radius: 4px;
-  padding: 5px 3px 5px 3px;
-  margin-bottom: 0.7em;
-  font-weight: bold;
-  cursor: pointer;
+    white-space: nowrap;
+    background-color: #F8FBDB;
+    border: 3px solid #F8FBDB;
+    border-radius: 4px;
+    padding: 5px 3px 5px 3px;
+    margin-bottom: 0.7em;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 #ei button:hover {
-  background-color: #9999FF;
-  border-radius: 4px;
-  border: 3px solid #F8FBDB;
-  color: white;
+    background-color: #9999FF;
+    border-radius: 4px;
+    border: 3px solid #F8FBDB;
+    color: white;
 }
 
 
 /* pfad tabelle */
 #pl {
-  display: inline-grid; 
-  grid-template-columns: auto 20px 40px 1fr 40px 20px auto; 
-  grid-template-rows: auto auto; 
-  gap: 0px 0px; 
+    display: inline-grid;
+    grid-template-columns: auto 20px 40px 1fr 40px 20px auto;
+    grid-template-rows: auto auto;
+    gap: 0px 0px;
 }
 
 #pl div {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #pl .pu1 {
-  width: 1em;
-  border-radius: 0 0 0 1em;
-  background-color: #FF9966;
-  height: 100%;
+    width: 1em;
+    border-radius: 0 0 0 1em;
+    background-color: #FF9966;
+    height: 100%;
 }
 
 #pl .pu7 {
-  width: 1em;
-  border-radius: 0 0 1em 0;
-  background-color: #FF9966;
-  height: 100%;
+    width: 1em;
+    border-radius: 0 0 1em 0;
+    background-color: #FF9966;
+    height: 100%;
 }
 
 #pl .po2, #pl .po6 {
-  background-color: #FF9966;
+    background-color: #FF9966;
 }
+
 #pl .po2 div {
-  width: 1em;
-  border-radius: 0 0 0 0.7em;
-  background-color: white;
-  height: 100%;
-  width: 100%;
+    width: 1em;
+    border-radius: 0 0 0 0.7em;
+    background-color: white;
+    height: 100%;
+    width: 100%;
 }
 
 #pl .po6 div {
-  width: 1em;
-  border-radius: 0 0 0.7em 0;
-  background-color: white;
-  height: 100%;
-  width: 100%;
+    width: 1em;
+    border-radius: 0 0 0.7em 0;
+    background-color: white;
+    height: 100%;
+    width: 100%;
 }
 
-#pl .po1, #pl .po7, #pl .pu2, #pl .pu6  {
-  background-color: #FF9966;
+#pl .po1, #pl .po7, #pl .pu2, #pl .pu6 {
+    background-color: #FF9966;
 }
-#pl .pu3, #pl .pu5  {
-  background-color: #CC6666;
+
+#pl .pu3, #pl .pu5 {
+    background-color: #CC6666;
 }
-#pl .pu4  {
-  background-color: #FFCC99;
-  font-size: 0.7em;
+
+#pl .pu4 {
+    background-color: #FFCC99;
+    font-size: 0.7em;
 }
-#pl .po4  {
-  text-align: center;
-  height: 1.7em;
+
+#pl .po4 {
+    text-align: center;
+    height: 1.7em;
 }
 
 #pl .po4 > div {
-  margin-top: 0.1em;
+    margin-top: 0.1em;
 }
 
 /* Windows */
@@ -1251,8 +1374,8 @@ div {
 }
 
 .windowcontent {
-    overflow:scroll;
-    overflow-x:hidden;
+    overflow: scroll;
+    overflow-x: hidden;
     position: relative;
     margin: 0;
     padding: 0;
@@ -1261,22 +1384,22 @@ div {
 }
 
 .windowtitle {
-    display: grid; 
+    display: grid;
     margin: 0;
-    grid-auto-rows: 1fr; 
-    grid-template-columns: 1fr 2px 20px; 
-    gap: 0px 0px; 
-}    
- 
+    grid-auto-rows: 1fr;
+    grid-template-columns: 1fr 2px 20px;
+    gap: 0px 0px;
+}
+
 .windowtitle .g {
     background-color: white;
-    margin:0;
+    margin: 0;
 }
 
 .windowtitle .t {
     padding-right: 10px;
     padding-left: 10px;
-    margin:0;
+    margin: 0;
     cursor: move;
     z-index: 12;
     background-color: #D8A570;
@@ -1298,7 +1421,6 @@ div {
     background-color: #959FFE;
 }
 
-
 .windowgrip {
     z-index: 12;
     margin: 0;
@@ -1311,6 +1433,20 @@ div {
     cursor: nwse-resize;
 }
 
+#windowform {
+    padding: 10px;
+}
+
+dialog::backdrop {
+    backdrop-filter: blur(1px);
+}
+
+#newname, #newname:focus, #newname:active {
+    width: 100%;
+    border: 1px solid gray;
+    border-radius: 2px;
+    outline: none;
+}
   )==g==";
 
 

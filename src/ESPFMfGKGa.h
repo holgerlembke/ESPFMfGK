@@ -32,10 +32,10 @@ private:
         String foldername;
     };
 
-    void deletefoldert(folder_t *root /**/);
-    void displayfoldert(folder_t *root /**/);
-    folder_t *buildfilelistrecurser(fs::FS &fs, String pfad, folder_t *localroot /**/);
-    folder_t *buildfilelist(fs::FS &fs, String rootfolder /**/);
+    void deletefoldert(folder_t *root);
+    void displayfoldert(folder_t *root);
+    folder_t *buildfolderlistrecurser(fs::FS &fs, String pfad, folder_t *localroot);
+    folder_t *buildfolderlist(fs::FS &fs, String rootfolder, int mode);
 
     int WriteChunk(const char *b, size_t l);
 
@@ -43,7 +43,7 @@ public:
     WebServer *fileManager = NULL;
     ESPxWebCallbackFlags_t checkFileFlags = NULL;
 
-    void getAllFilesInOneZIP(fs::FS *fs, String rootfolder);
+    void getAllFilesInOneZIP(fs::FS *fs, String rootfolder, int mode);
 };
 
 #endif

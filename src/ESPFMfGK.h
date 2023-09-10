@@ -8,10 +8,20 @@
     lembke@gmail.com
 
   Changes
+    V1.9
+     + new design for "download-all", "rename/move" and "delete" dialog
+     + option to remove zipdownloadall-code, saves 4k
+     + deactivated lots of serial.prints...
+     + Arduino-release V2.0.9
+
+  Changes
     V1.8
      + Arduino-release V2.0.8
 
   Changes
+    V1.8
+     + Editorinsert schickt größere Datenchunks
+
     V1.7
      + preview-fenster-titel transparenz optimiert
      + Redesign ZIP-Schnittstelle, Verlagerung in eigenen .h/.cpp wg. Sourcecodeumfangsverminderung 
@@ -65,6 +75,10 @@
 */
 #define fileManagerServerStaticsInternally
 // #define fileManagerServerStaticsInternallyDeflate
+
+
+// if you do not need the "download all files" function, commenting out this define saves about 4k code space
+#define ZipDownloadAll
 
 
 // Callback for "foreign" URLs called to web server. If not set, all files will be served

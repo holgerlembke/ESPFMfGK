@@ -63,7 +63,7 @@ struct __attribute__((__packed__)) zipCentralDirectoryFileHeader
 };
 
 //*****************************************************************************************************
-void ESPFMfGKGa::deletefoldert(folder_t *root /**/)
+void ESPFMfGKGa::deletefoldert(folder_t *root)
 {
   while (root)
   {
@@ -74,7 +74,7 @@ void ESPFMfGKGa::deletefoldert(folder_t *root /**/)
 }
 
 //*****************************************************************************************************
-void ESPFMfGKGa::displayfoldert(folder_t *root /**/)
+void ESPFMfGKGa::displayfoldert(folder_t *root)
 {
   while (root)
   {
@@ -84,7 +84,7 @@ void ESPFMfGKGa::displayfoldert(folder_t *root /**/)
 }
 
 //*****************************************************************************************************
-ESPFMfGKGa::folder_t *ESPFMfGKGa::buildfilelistrecurser(fs::FS &fs, String pfad, ESPFMfGKGa::folder_t *localroot /**/)
+ESPFMfGKGa::folder_t *ESPFMfGKGa::buildfolderlistrecurser(fs::FS &fs, String pfad, ESPFMfGKGa::folder_t *localroot)
 {
   File rootfile = fs.open(pfad);
   if (!rootfile)
@@ -113,7 +113,7 @@ ESPFMfGKGa::folder_t *ESPFMfGKGa::buildfilelistrecurser(fs::FS &fs, String pfad,
       localroot->foldername = file.path();
       localroot->next = NULL;
 
-      localroot = buildfilelistrecurser(fs, file.path(), localroot);
+      localroot = buildfolderlistrecurser(fs, file.path(), localroot);
     }
     file = rootfile.openNextFile();
   }
@@ -121,7 +121,7 @@ ESPFMfGKGa::folder_t *ESPFMfGKGa::buildfilelistrecurser(fs::FS &fs, String pfad,
 }
 
 //*****************************************************************************************************
-ESPFMfGKGa::folder_t *ESPFMfGKGa::buildfilelist(fs::FS &fs /**/, String rootfolder)
+ESPFMfGKGa::folder_t *ESPFMfGKGa::buildfolderlist(fs::FS &fs, String rootfolder, int mode)
 {
   /** /
   Serial.print("buildfilelist root: ");
@@ -132,7 +132,10 @@ ESPFMfGKGa::folder_t *ESPFMfGKGa::buildfilelist(fs::FS &fs /**/, String rootfold
 
   root->next = NULL;
   root->foldername = rootfolder;
-  buildfilelistrecurser(fs, rootfolder, root);
+  if (mode != 2)
+  {
+    buildfolderlistrecurser(fs, rootfolder, root);
+  }
 
   return root;
 }
@@ -158,13 +161,24 @@ int ESPFMfGKGa::WriteChunk(const char *b, size_t l)
    https://hexed.it/?hl=de
    HxD https://mh-nexus.de/de/
    unzip -t <filename>
+   https://www.youtube.com/watch?v=0kadkQDc1Ts
 
    This code needs some memory:
      4 * <nr. of files> + copybuffersize
 
    Uses no compression, because, well, code size. Should be good for 4mb.
+
+   rootfolder
+    empty ---> /
+    else  ---> folder
+
+   mode
+    1 all files on device
+    2 this folder
+    3 this folder and subfolders
+
 */
-void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
+void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder, int mode)
 {
   const int copybuffersize = 4 * 512; // Any suggestion about optimal size?
 
@@ -183,7 +197,7 @@ void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
   }
 
   // Pass -1: get folder list
-  folder_t *folderlist = buildfilelist(*fs, rootfolder);
+  folder_t *folderlist = buildfolderlist(*fs, rootfolder, mode);
   /** /
   displayfoldert(folderlist);
   /**/
@@ -227,7 +241,7 @@ void ESPFMfGKGa::getAllFilesInOneZIP(fs::FS *fs, String rootfolder)
 
   // Pass 1: local headers + file
   {
-    uint8_t * copybuffer;
+    uint8_t *copybuffer;
     copybuffer = new uint8_t[copybuffersize];
 
     zipFileHeader zip;

@@ -59,22 +59,30 @@ Look into the examples. They are a good boiler plate to start from.
 
 They explain the security system around managing files visibility and operations. In most cases it will be a simple copy-paste-use thingy. 
 
-# define fileManagerServerStaticsInternally
+# Defines
+
+Defines are used to configure some basic features of ESPFMfGK.
+
+## define fileManagerServerStaticsInternally
 
 By design concept ESPFMfGK is inteded as "drop it in and that is it" solution. To archive that it includes 
 its own html/css/javascript files. They are stored in code space and eat something around 35k.
 
-If you want to reduce the code footprint, undefine that define and put those files into the first added filesystem. No free lunch, either code space or file system.
+If you want to reduce the code footprint, undefine that define and put the files from "filemanager" folder into the first added filesystem. No free lunch, either code space or file system.
 
-# define fileManagerServerStaticsInternallyDeflate
+## define fileManagerServerStaticsInternallyDeflate
 
 After reading that stuff in the chapter above there is an alternative version of storing the html/css/javascript files in code space: deflated data. That reduces the footprint to about 10k.
 
-It is a tiny little bit http-protocol incompatible by ignoring whatever content the browser requests and always sending the deflated data.
+It is a tiny little bit http-protocol incompatible by ignoring whatever content the browser requests and always sends the deflated data.
 
 So either define one of those defines or none.
 
 (All numbers are ballpark figures only and generous rounded up to include future code expansions.)
+
+## ZipDownloadAll
+
+Comment this define if you do not need the "download all files" functionality. It will save about 4 to 5k code space.
 
 
 # Stuff I used
