@@ -43,7 +43,7 @@ simply click on (R)ename and add a 1: at the start of the filename.
 
 ### Edit
 
-Lets edit a file! Works well for everything that is editable.
+Permanent editor windows! Just open a file in a windowed editor, change content, click "save", change content, click "save". Works well for everything that is editable.
 
 ### Preview
 

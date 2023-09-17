@@ -144,7 +144,9 @@ const filerenameinsert =
 const filedeleteinsert =
     "Delete file <i>%f%</i>?<br><input type=\"hidden\" id=\"filename\"><p><br>Deleting files is final.</p>";
 
-const windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div><div class=\"g\"></div>" +
+const windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div>" +
+    "<div class=\"tsi\"><div class=\"ts\">Save</div></div>" +
+    "<div class=\"g\"></div>" +
     "<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>" +
     "<div class=\"windowgrip\">:::</div></div>";
 
@@ -505,7 +507,7 @@ function previewfile(filename) {
             // alles furchtbar umständlich, weil bilder nur als BLOB funktionieren und Text daher wieder aus dem Blob gelesen werden muss... 
 
             var content = document.querySelector("#" + winid + " .windowcontent");
-            var dragger = document.querySelector("#" + winid + " .windowtitle");
+            // var dragger = document.querySelector("#" + winid + " .windowtitle");
             var winid = '#' + "win" + windowcounter;
             var node = document.querySelector(winid);
 
@@ -544,71 +546,67 @@ function editfile(filename) {
     editxhr.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
-            hidepathtree();
-            elementfi.innerHTML = "";
-            elementfi.style.visibility = "collapse";
-            elementei.innerHTML = this.responseText;
-            elementei.style.display = "block";
-            elemento3.innerHTML = "Edit " + filename;
+            var newwin = windowhtml;
 
-            var elem = document.getElementById("tect");
-            elem.style.height = (window.innerHeight - 120) + "px";
-            elem.style.width = (window.innerWidth - 150) + "px";
+            var winid = "win" + windowcounter;
+            newwin = newwin.replaceAll("%i%", "win" + windowcounter);
+            newwin = newwin.replaceAll("%t%", filename);
+            var elem = document.createRange().createContextualFragment(newwin);
+            document.body.appendChild(elem);
 
+            var winid = '#' + "win" + windowcounter;
+
+            var content = document.querySelector(winid + " .windowcontent");
+            var node = document.querySelector(winid);
+            document.querySelector(".windowgrip").style.display="none";
+
+            content.outerHTML = this.responseText;
+
+            var save = document.querySelector(winid + " .ts");
+            save.style.display = "block";
+            save.addEventListener('click', () => {
+                content = document.querySelector(winid + " textarea").value;
+
+                var xhr = new XMLHttpRequest();
+
+                xhr.open('POST', '/r?fs=' + getFileSystemIndex() + '&fn=' + filename);
+
+                var boundary = '-----whatever';
+                xhr.setRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+                var body = "" +
+                    '--' + boundary + '\r\n' +
+                    'Content-Disposition: form-data; name="uploadfile"; filename="' + filename + '"' + '\r\n' +
+                    'Content-Type: text/plain' + '\r\n' +
+                    '' + '\r\n' +
+                    content + '\r\n' +
+                    '--' + boundary + '--\r\n' + // \r\n fixes upload delay in ESP8266WebServer
+                    '';
+
+                xhr.onreadystatechange = function() {
+                    var DONE = this.DONE || 4;
+                    if (this.readyState === DONE) {
+                       // Fertig
+                       getfileinsert();
+                    }
+                }
+                xhr.onprogress = progressfunc;
+
+                xhr.send(body);
+            });
+
+            makeDraggable(node);
+
+            windowcounter++;
             msgline("");
             waitspinner(false);
         }
     };
+
     editxhr.onprogress = progressfunc;
     editxhr.open('GET', "/job?fs=" + getFileSystemIndex() + "&job=edit&fn=" + filename, true);
     editxhr.send(null);
     waitspinner(true);
-}
-
-//000000000000000000000000000
-function sved(filename) {
-    var content = document.getElementById('tect').value;
-    // utf-8, this does not work.
-    // content = unescape(encodeURIComponent(content));
-
-    var xhr = new XMLHttpRequest();
-
-    xhr.open('POST', '/r?fs=' + getFileSystemIndex() + '&fn=' + filename);
-
-    var boundary = '-----whatever';
-    xhr.setRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
-
-    var body = "" +
-        '--' + boundary + '\r\n' +
-        'Content-Disposition: form-data; name="uploadfile"; filename="' + filename + '"' + '\r\n' +
-        'Content-Type: text/plain' + '\r\n' +
-        '' + '\r\n' +
-        content + '\r\n' +
-        '--' + boundary + '--\r\n' + // \r\n fixes upload delay in ESP8266WebServer
-        '';
-
-    // ajax does not do xhr.setRequestHeader("Content-length", body.length);
-
-    xhr.onreadystatechange = function() {
-        var DONE = this.DONE || 4;
-        if (this.readyState === DONE) {
-            elementei.innerHTML = "";
-            elementei.style.display = "none";
-            elementfi.style.visibility = "visible";
-            getfileinsert();
-        }
-    }
-    xhr.onprogress = progressfunc;
-
-    xhr.send(body);
-}
-
-//000000000000000000000000000
-function abed() {
-    elementei.innerHTML = "";
-    elementei.style.display = "none";
-    elementfi.style.visibility = "visible";
-    getfileinsert();
 }
 
 var uploaddone = true; // hlpr for multiple file uploads
@@ -807,8 +805,8 @@ function makeDraggable(box) {
         box.style.width = e.pageX - box.getBoundingClientRect().left + 'px';
         box.style.height = e.pageY - box.getBoundingClientRect().top + 'px';
         if (content) {
-            content.style.width = e.pageX - content.getBoundingClientRect().left + 'px';
-            content.style.height = e.pageY - content.getBoundingClientRect().top + 'px';
+            content.style.width = (e.pageX - content.getBoundingClientRect().left) + 'px';
+            content.style.height = (e.pageY - content.getBoundingClientRect().top) + 'px';
         }
     }
 
@@ -855,7 +853,8 @@ function renamefileinit(formdata) {
 
 //000000000000000000000000000
 function renamefileanalyzer(formdata) {
-    var filename = document.getElementById("finame").value;
+    var newname = document.getElementById("newname").value;
+    var oldname = document.getElementById("oldname").value;
 
     msgline("Please wait. Rename in progress...");
     executecommand("job=ren&fn=" + oldname + "&new=" + newname);
@@ -1383,11 +1382,25 @@ div {
     border-left: 2px solid #D8A570;
 }
 
+#tect {
+    background-color: white;
+    padding: 2px;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: scroll;
+}
+
+.windowcontent pre {
+    background-color: white;
+    display: inline-block;
+    padding: 2px;
+}
+
 .windowtitle {
     display: grid;
     margin: 0;
     grid-auto-rows: 1fr;
-    grid-template-columns: 1fr 2px 20px;
+    grid-template-columns: 1fr auto 2px 20px;
     gap: 0px 0px;
 }
 
@@ -1405,6 +1418,25 @@ div {
     background-color: #D8A570;
     border-top-left-radius: 10px;
     color: #fff;
+}
+
+.windowtitle .tsi {
+    padding: 0;
+    margin: 0;
+}    
+
+.windowtitle .ts {
+    border-radius: 0px;
+    background-color: #BBB2FF;
+    color: white;
+    padding: 0 5px 0 5px;
+    margin: 0;
+    display: none;
+}
+
+.windowtitle .ts:hover {
+    background-color: #D36669;
+    color: black;
 }
 
 .windowclose {

@@ -461,9 +461,9 @@ void ESPFMfGK::recurseFolderList(String foldername, int maxtiefe, int tiefe)
 //*****************************************************************************************************
 String ESPFMfGK::Folder1LevelUp(String foldername)
 {
-    /** /
-  Serial.println(foldername);
-    /**/
+  /** /
+Serial.println(foldername);
+  /**/
   int i = foldername.length();
   while ((i > 0) && (foldername.charAt(i) != '/'))
   {
@@ -768,9 +768,9 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
     { // file exists!
       if (checkFileFlags(*fsinfo[fsi].filesystem, fn, flagIsValidAction | flag) & flag == 0)
       {
-    /** /
-        Serial.println("checkFileFlags fail.");
-    /**/
+        /** /
+            Serial.println("checkFileFlags fail.");
+        /**/
         return "";
       }
 
@@ -779,9 +779,9 @@ String ESPFMfGK::getFileNameFromParam(uint32_t flag)
     }
   }
 
-    /** /
-  Serial.println("Return nothing");
-    /**/
+  /** /
+Serial.println("Return nothing");
+  /**/
   return "";
 }
 
@@ -1164,9 +1164,6 @@ void ESPFMfGK::fileManagerFileEditorInsert(String &filename)
   }
 
   fileManager->sendContent(ESPFMfGKWpFormExtro1);
-  fileManager->sendContent(filename);
-  fileManager->sendContent(ESPFMfGKWpFormExtro2);
-
   fileManager->sendContent("");
 }
 

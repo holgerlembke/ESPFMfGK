@@ -8,6 +8,12 @@
     lembke@gmail.com
 
   Changes
+    V2.0.1
+     + Fix: https://github.com/holgerlembke/ESPFMfGK/issues/1
+
+    V2.0
+     + dauerhafte FensterEditoren
+
     V1.9
      + new design for "download-all", "rename/move" and "delete" dialog
      + option to remove zipdownloadall-code, saves 4k
