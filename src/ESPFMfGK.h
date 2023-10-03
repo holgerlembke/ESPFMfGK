@@ -8,6 +8,13 @@
     lembke@gmail.com
 
   Changes
+    V2.0.3
+     + fm.js: fixed dialog event handling code
+     + fm.js: LoadHtmlIncludesProcessor implementiert
+
+    V2.0.2
+     + dispFileString auf uint64_t umgestellt
+
     V2.0.1
      + Fix: https://github.com/holgerlembke/ESPFMfGK/issues/1
 
@@ -98,6 +105,9 @@ typedef int (*ESPxWebCallbackURL_t)(String &data);
 // Callback for checking file flags. Please look into the examples.
 typedef uint32_t (*ESPxWebCallbackFlags_t)(fs::FS &fs, String filename, uint32_t flags);
 
+// Callback for the HtmlIncludes
+typedef bool (*HtmlIncludesCallback_t)(WebServer *webserver);
+
 class ESPFMfGK
 {
 public:
@@ -124,6 +134,7 @@ public:
 
   ESPxWebCallbackFlags_t checkFileFlags = NULL;
   ESPxWebCallbackURL_t checkURLs = NULL;
+  HtmlIncludesCallback_t HtmlIncludesCallback = NULL;
 
   // Frage aller Fragen: sollte eine automatische Umschaltung Flat/Treeview gebaut werden und
   //                     wie wäre dann der Ablauf
@@ -144,7 +155,7 @@ private:
 
   void fileManagerNotFound(void);
   String dispIntDotted(size_t i);
-  String dispFileString(size_t fs, bool printorg);
+  String dispFileString(uint64_t fs, bool printorg);
   String CheckFileNameLengthLimit(String fn);
 
   // the webpage
@@ -174,6 +185,7 @@ private:
   void fileManagerFileEditorInsert(String &filename);
   void fileManagerDownload(String &filename);
   void servefile(String uri);
+  void HtmlIncludesInterface(void);
   void Illegal404();
 
   // Hlpr für die Verwaltung, was angezeigt werden soll
@@ -225,6 +237,8 @@ public:
   String WebPageTitle = "";
   // set "accept-charset=\"utf-8\"" for utf-8 support in textarea
   String textareaCharset = "";
+  // add this html-files as windowed item, can be list ;-separated
+  String HtmlIncludes = "";
 };
 
 #endif

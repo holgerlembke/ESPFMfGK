@@ -84,6 +84,27 @@ So either define one of those defines or none.
 
 Comment this define if you do not need the "download all files" functionality. It will save about 4 to 5k code space.
 
+# String HtmlIncludes = "";
+
+With HtmlIncludes multiple non modal windows can be created by automatically inserting html/css/js. 
+
+```
+  HtmlIncludes = "/window.html;/monitor.html";
+```
+
+## Rules
+
+### outer html container
+
+- position: absolute;
+- margin: 0;
+
+### id of container
+
+The HTML file must have a first comment with the id-name of the container.
+
+
+
 
 # Stuff I used
 

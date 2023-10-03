@@ -484,6 +484,7 @@ div {
     padding: 0 5px 0 5px;
     margin: 0;
     display: none;
+    cursor: pointer;
 }
 
 .windowtitle .ts:hover {

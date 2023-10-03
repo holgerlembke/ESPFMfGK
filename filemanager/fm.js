@@ -8,6 +8,10 @@ var elementti = null;
 var elementpi = null;
 var elementws = null;
 
+// globale Dialogroutinen
+var dialog = null;
+var dialogOKCall = null;
+
 const sektionstrenner = String.fromCharCode(3, 1, 2);
 const antworttrenner = String.fromCharCode(2, 1, 3);
 const itemtrenner = String.fromCharCode(2, 1, 4);
@@ -44,6 +48,11 @@ const windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">
     "<div class=\"g\"></div>" +
     "<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>" +
     "<div class=\"windowgrip\">:::</div></div>";
+
+
+// OUTLINE: Callbacks für die HTMLIncludes, um die Aktionen mitzubekommen.
+var callbackFileinsert = [];
+
 
 //000000000000000000000000000
 function compressurlfile(source) {
@@ -315,6 +324,11 @@ function AnswerProcessor() {
 
         msgline("");
         waitspinner(false);
+
+
+        for (let i = 0; i < callbackFileinsert.length; i++) {
+          //callbackFileinsert[i]();
+        }
     }
 }
 
@@ -359,9 +373,56 @@ function BootAnswerProcessor() {
             filesysteminfos = res[3];
         }
 
+        if ((res.length >= 5) && (res[4] != "")) {
+            LoadHtmlIncludes(res[4]);
+        }
+
         // und nun kann die Dateiliste geholt werden
         getfileinsert();
     }
+}
+
+//000000000000000000000000000
+function LoadHtmlIncludesProcessor() {
+    var DONE = this.DONE || 4;
+    if (this.readyState === DONE) {
+        var res = this.responseText;
+
+        // First comment has to be <!--XXXXX--> with xxxx the unique windows id
+        var st = res.search("<!--");
+        var en = res.search("-->");
+        if ((st>=0) && (en>st)) {
+            var id = res.substring(st+4,en).trim();
+
+            var elem = document.createRange().createContextualFragment(res);
+            document.body.appendChild(elem);
+            // alles async, also warten, bis browser soweit ist.  
+            var script = document.getElementById(id+".scr");
+            script.addEventListener('load', function() {
+                var node = document.getElementById(id);
+                if (node) {
+                    makeDraggable(node);
+                }
+                // aufruf der startfunktion
+                window[id]();
+            });
+        }
+    }
+}
+
+//000000000000000000000000000
+function LoadHtmlIncludes(includelist) {
+    waitspinner(true);
+
+    var includes = includelist.split(";");
+
+    includes.forEach(function (incl) {
+        var includexhr = new XMLHttpRequest();
+        includexhr.onreadystatechange = LoadHtmlIncludesProcessor;
+
+        includexhr.open('GET', incl, true);
+        includexhr.send(null);
+    });
 }
 
 //000000000000000000000000000
@@ -618,6 +679,7 @@ function makeDraggable(box) {
         if (content.clientWidth > window.innerWidth) {
             content.style.width = window.innerWidth / 2 + "px";
         }
+        content.addEventListener("click",bringbox2front);
     }
 
     let title = box.querySelector('.windowtitle');
@@ -661,7 +723,7 @@ function makeDraggable(box) {
         }
     }
 
-    // Resizeing
+    // Dragging
     function startDrag(e) {
         bringbox2front();
         e.preventDefault();
@@ -776,11 +838,35 @@ function downloadmgr() {
     showdialog(0, downloadmgrresanalyzer, folderdownloadinsert, "Download files");
 }
 
+//000000000000000000000000000
+//000000000000000000000000000
+function dialogkill() {
+    document.getElementById("dok").removeEventListener("click",dialogeventlistenerHndlOK);
+    document.getElementById("dcancel").removeEventListener("click",dialogeventlistenerHndlCancel);
+    document.getElementById("dclose").removeEventListener("click",dialogeventlistenerHndlCancel);
+
+    dialog = null;
+    dialogOKCall = null;
+}
 
 //000000000000000000000000000
+function dialogeventlistenerHndlOK() {
+  dialog.close();
+  if (dialogOKCall ) {
+    dialogOKCall ();
+  };
+  dialogkill();
+}
+
+//000000000000000000000000000
+function dialogeventlistenerHndlCancel() {
+  dialog.close();
+  dialogkill();
+}
+
 //000000000000000000000000000
 function showdialog(initcall, okcall, dialogitems, title, formdata) {
-    var dialog = document.getElementById("prompt");
+    dialog = document.getElementById("prompt");
     var result = document.getElementById("result");
 
     var html = document.getElementById("windowform");
@@ -792,26 +878,10 @@ function showdialog(initcall, okcall, dialogitems, title, formdata) {
         initcall(formdata);
     }
 
-    document.getElementById("dok")
-        .addEventListener("click", () => {
-            result.value = "ok";
-            dialog.close();
-            if (okcall) {
-                okcall();
-            }
-        });
-
-    document.getElementById("dcancel")
-        .addEventListener("click", () => {
-            result.value = "cancel";
-            dialog.close();
-        });
-
-    document.getElementById("dclose")
-        .addEventListener("click", () => {
-            result.value = "cancel";
-            dialog.close();
-        });
+    document.getElementById("dok").addEventListener("click",dialogeventlistenerHndlOK);
+    document.getElementById("dcancel").addEventListener("click",dialogeventlistenerHndlCancel);
+    document.getElementById("dclose").addEventListener("click",dialogeventlistenerHndlCancel);
+    dialogOKCall = okcall;
 
     // Async!
     dialog.showModal();
@@ -834,4 +904,9 @@ function boot() {
 }
 
 //->
-window.onload = boot;
+// window.onload = boot;
+window.addEventListener("load", boot);
+
+
+
+

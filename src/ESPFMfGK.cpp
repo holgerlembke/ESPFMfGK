@@ -62,6 +62,8 @@ bool ESPFMfGK::begin()
   fileManager->on("/b", HTTP_GET, std::bind(&ESPFMfGK::fileManagerBootinfo, this));
   // processes all the requests (edit,delete,rename, etc)
   fileManager->on("/job", HTTP_GET, std::bind(&ESPFMfGK::fileManagerJobber, this));
+  // Interface Calls from HtmlIncludes
+  fileManager->on("/if", HTTP_GET, std::bind(&ESPFMfGK::HtmlIncludesInterface, this));
   // file receiver with attached file to form
   fileManager->on("/r", HTTP_POST, std::bind(&ESPFMfGK::fileManagerReceiverOK, this),
                   std::bind(&ESPFMfGK::fileManagerReceiver, this));
@@ -268,7 +270,7 @@ String ESPFMfGK::dispIntDotted(size_t i)
 }
 
 //*****************************************************************************************************
-String ESPFMfGK::dispFileString(size_t fs, bool printorg)
+String ESPFMfGK::dispFileString(uint64_t fs, bool printorg)
 {
   if (fs < 0)
   {
@@ -704,7 +706,9 @@ void ESPFMfGK::fileManagerBootinfo(void)
       extrabootinfotrenner + //
       WebPageTitle +         //
       extrabootinfotrenner +
-      fsinfos;
+      fsinfos +
+      extrabootinfotrenner +
+      HtmlIncludes;
 
   fileManager->send(200, F("text/html"), cache);
 }
@@ -969,6 +973,7 @@ void ESPFMfGK::fileManagerJobber(void)
 
       if (checkFileFlags(*fsinfo[fsi].filesystem, newfn, flagCanRename | flagIsValidTargetFilename) & flagCanRename == 0)
       {
+        Serial.println("Ren: No access.");
         Illegal404();
         return;
       }
@@ -1109,6 +1114,22 @@ void ESPFMfGK::fileManagerJobber(void)
 
   // in case all fail, ends here
   Illegal404();
+}
+
+//*****************************************************************************************************
+void ESPFMfGK::HtmlIncludesInterface(void)
+{
+  if (HtmlIncludesCallback)
+  {
+    if (!HtmlIncludesCallback(fileManager))
+    {
+      Illegal404();
+    }
+  }
+  else
+  {
+    Illegal404();
+  }
 }
 
 //*****************************************************************************************************
