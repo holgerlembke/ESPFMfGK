@@ -12,6 +12,8 @@ var elementws = null;
 var dialog = null;
 var dialogOKCall = null;
 
+// wirklich mal auf let umstellen!!
+
 const sektionstrenner = String.fromCharCode(3, 1, 2);
 const antworttrenner = String.fromCharCode(2, 1, 3);
 const itemtrenner = String.fromCharCode(2, 1, 4);

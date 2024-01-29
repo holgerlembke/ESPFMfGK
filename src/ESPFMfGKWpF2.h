@@ -6,10 +6,10 @@ static const char ESPFMfGKWpFormIntro1[] PROGMEM =
 R"==x==(<form )==x==";
 
 static const char ESPFMfGKWpFormIntro2[] PROGMEM =  
-R"==x==(><textarea id="tect" class="windowcontent" rows="25" cols="80">)==x==";
+R"==x==(><div class="editor"><div class="line-numbers"><span></span></div><textarea class="windowcontent" rows="25" cols="80">)==x==";
 
 static const char ESPFMfGKWpFormExtro1[] PROGMEM = 
-R"==x==(</textarea></form>)==x==";
+R"==x==(</textarea></div></form>)==x==";
 
 // not sure what the <script> part is for.
 static const char ESPFMfGKWpFormExtro2[] PROGMEM = 

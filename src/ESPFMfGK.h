@@ -8,9 +8,14 @@
     lembke@gmail.com
 
   Changes
+    V2.0.4
+     + fm.js: langsame Umstellung von "var" auf "let", "use strict";
+     + fm.hmtl: "reload file list"
+
     V2.0.3
      + fm.js: fixed dialog event handling code
      + fm.js: LoadHtmlIncludesProcessor implementiert
+     + Arduino-release V2.0.10
 
     V2.0.2
      + dispFileString auf uint64_t umgestellt
@@ -86,7 +91,7 @@
 
      For compatibility reasons, the fileManagerServerStaticsInternally is activated by default.
 */
-#define fileManagerServerStaticsInternally
+// #define fileManagerServerStaticsInternally
 // #define fileManagerServerStaticsInternallyDeflate
 
 
