@@ -3,7 +3,7 @@
 #include <ESPFMfGKGa.h>
 #include <FS.h>
 
-#include <crc32.h>
+#include <CRC32.h>
 
 struct __attribute__((__packed__)) zipFileHeader
 {
