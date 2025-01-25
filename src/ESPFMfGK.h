@@ -7,7 +7,35 @@
     https://github.com/holgerlembke/ESPFMfGK
     lembke@gmail.com
 
+das funktioniert nicht, weil der / nicht mitgeliefert wird. wie sieht das 
+überhaupt mit den filename + pfad aus?
+  // this will hide system files (in my world, system files start with a dot)
+  if (filename.startsWith("/.")) {
+    // no other flags, file is invisible and nothing allowed
+    return ESPFMfGK::flagIsNotVisible;
+  }
+
+  Hi, thanks for your great work.
+I have a few suggestions:
+
+    add a button to erase all files
+    add an HEX editor
+
+
+wenn es nur ein fs gibt, keine kombobox erzeugen  
+
+
+symbol,, um filecontent zu aktualisieren
+
+tab im editor zum echten tab umwandeln.
+
+
   Changes
+    V2.0.5
+     + Fix: https://github.com/holgerlembke/ESPFMfGK/issues/8
+     + Make webserver "fileManager" accessible via "WebServer getWebServerPtr() {return fileManager;}"
+     + Arduino-release V2.0.11
+
     V2.0.4
      + fm.js: langsame Umstellung von "var" auf "let", "use strict";
      + fm.hmtl: "reload file list"
@@ -32,11 +60,9 @@
      + deactivated lots of serial.prints...
      + Arduino-release V2.0.9
 
-  Changes
     V1.8
      + Arduino-release V2.0.8
 
-  Changes
     V1.8
      + Editorinsert schickt größere Datenchunks
 
@@ -85,15 +111,14 @@
      You can use the callback to hide the /fm.* files, isFileManagerInternalFile(String fn) helps with that.
 
      Difference:
-       fileManagerServerStaticsInternallyDeflate is compressed and a tiny little bit violation protocol
-          by allways serving deflate files, whatever the browsers asks for...
+       fileManagerServerStaticsInternallyDeflate is compressed and a tiny little bit violation
+       protocol by always serving deflate files, whatever the browsers asks for...
        fileManagerServerStaticsInternally serves pure uncompressed data. Huge. 33k.
 
      For compatibility reasons, the fileManagerServerStaticsInternally is activated by default.
 */
-// #define fileManagerServerStaticsInternally
+#define fileManagerServerStaticsInternally
 // #define fileManagerServerStaticsInternallyDeflate
-
 
 // if you do not need the "download all files" function, commenting out this define saves about 4k code space
 #define ZipDownloadAll
@@ -145,6 +170,7 @@ public:
   //                     wie wäre dann der Ablauf
   enum DefaultViewMode_t { dvmNone, dvmFlat, dvmTree };
 
+  WebServer* getWebServerPtr() {return fileManager; }
 private:
   struct FileSystemInfo_t  // sizeof: 24, packed: 21
   {

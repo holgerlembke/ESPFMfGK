@@ -12,11 +12,26 @@
 #include <LittleFS.h>
 #include <SD_MMC.h>
 #include <FFat.h>
-#include <detail/RequestHandlersImpl.h>
+#include <detail/mimetable.h>
 
+
+// copy of static String getContentType(const String &path) from detail/RequestHandlersImpl.h
+// decorated with some "mime::"
 String getContentType(const String &path)
 {
-  return StaticRequestHandler::getContentType(path);
+    char buff[sizeof(mime::mimeTable[0].mimeType)];
+
+    // Check all entries but last one for match, return if found
+    for (size_t i = 0; i < sizeof(mime::mimeTable) / sizeof(mime::mimeTable[0]) - 1; i++) {
+      strcpy_P(buff, mime::mimeTable[i].endsWith);
+      if (path.endsWith(buff)) {
+        strcpy_P(buff, mime::mimeTable[i].mimeType);
+        return String(buff);
+      }
+    }
+    // Fall-through and just return default type
+    strcpy_P(buff, mime::mimeTable[sizeof(mime::mimeTable) / sizeof(mime::mimeTable[0]) - 1].mimeType);
+    return String(buff);
 }
 
 //*****************************************************************************************************
@@ -38,6 +53,7 @@ bool ESPFMfGK::begin()
 {
   if (fsinfo[0].filesystem == NULL)
   {
+    Serial.println("Panic: FileManager not started. No filesystem added.");
     return false;
   }
 
@@ -175,21 +191,21 @@ void ESPFMfGK::fileManagerNotFound(void)
 #ifdef fileManagerServerStaticsInternallyDeflate
   if ((uri == "/fm.html") || (uri == "/"))
   {
-    Serial.println("senddeflat");
+    //Serial.println("senddeflat");
     fileManager->sendHeader("Content-Encoding", "deflate");
     fileManager->send_P(200, "text/html", ESPFMfGKWpindexpageDeflate, sizeof(ESPFMfGKWpindexpageDeflate));
     return;
   }
   if (uri == "/fm.css")
   {
-    Serial.println("senddeflat");
+    //Serial.println("senddeflat");
     fileManager->sendHeader("Content-Encoding", "deflate");
     fileManager->send_P(200, "text/css", ESPFMfGKWpcssDeflate, sizeof(ESPFMfGKWpcssDeflate));
     return;
   }
   if (uri == "/fm.js")
   {
-    Serial.println("senddeflat");
+    //Serial.println("senddeflat");
     fileManager->sendHeader("Content-Encoding", "deflate");
     fileManager->send_P(200, "text/javascript", ESPFMfGKWpjavascriptDeflate, sizeof(ESPFMfGKWpjavascriptDeflate));
     return;
