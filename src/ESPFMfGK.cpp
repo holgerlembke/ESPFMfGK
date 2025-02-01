@@ -1290,7 +1290,13 @@ void ESPFMfGK::fileManagerReceiver(void)
     // cut length
     fn = CheckFileNameLengthLimit(fn);
 
-    if (checkFileFlags(*fsinfo[fsi].filesystem, fn, flagCanUpload | flagIsValidTargetFilename) & flagCanUpload == 0)
+    // https://github.com/holgerlembke/ESPFMfGK/issues/13
+    if ((checkFileFlags(*fsinfo[fsi].filesystem, fn, flagCanUpload) & flagCanUpload) == 0)
+    {
+      return;
+    }
+
+    if ((checkFileFlags(*fsinfo[fsi].filesystem, fn, flagIsValidTargetFilename) & flagIsValidTargetFilename) != 0)
     {
       return;
     }

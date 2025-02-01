@@ -31,6 +31,10 @@ tab im editor zum echten tab umwandeln.
 
 
   Changes
+    V2.0.6
+     + Fix: https://github.com/holgerlembke/ESPFMfGK/issues/13
+     + Arduino-release V2.0.12
+
     V2.0.5
      + Fix: https://github.com/holgerlembke/ESPFMfGK/issues/8
      + Make webserver "fileManager" accessible via "WebServer getWebServerPtr() {return fileManager;}"
