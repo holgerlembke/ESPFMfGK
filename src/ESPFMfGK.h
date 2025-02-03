@@ -31,6 +31,11 @@ tab im editor zum echten tab umwandeln.
 
 
   Changes
+    V2.0.7
+     + Fix: another checkFileFlags() error...
+     + add "SOC_SDMMC_HOST_SUPPORTED" for devices without this support
+     + Arduino-release V2.0.13
+
     V2.0.6
      + Fix: https://github.com/holgerlembke/ESPFMfGK/issues/13
      + Arduino-release V2.0.12

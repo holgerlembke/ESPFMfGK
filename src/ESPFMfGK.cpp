@@ -987,7 +987,7 @@ void ESPFMfGK::fileManagerJobber(void)
       }
       int fsi = getFileSystemIndex();
 
-      if (checkFileFlags(*fsinfo[fsi].filesystem, newfn, flagCanRename | flagIsValidTargetFilename) & flagCanRename == 0)
+      if ((checkFileFlags(*fsinfo[fsi].filesystem, newfn, flagCanRename | flagIsValidTargetFilename) & flagCanRename) == 0)
       {
         Serial.println("Ren: No access.");
         Illegal404();
@@ -1376,10 +1376,12 @@ String ESPFMfGK::DeUmlautFilename(String fn)
 // total/used are not exposed in FS::FS. Who knows why.
 uint64_t ESPFMfGK::totalBytes(fs::FS *fs)
 {
+#ifdef SOC_SDMMC_HOST_SUPPORTED
   if (fs == &SD_MMC)
   {
     return SD_MMC.totalBytes();
   }
+#endif  
   else if (fs == &SD)
   {
     return SD.totalBytes();
@@ -1401,10 +1403,12 @@ uint64_t ESPFMfGK::totalBytes(fs::FS *fs)
 //*****************************************************************************************************
 uint64_t ESPFMfGK::usedBytes(fs::FS *fs)
 {
+#ifdef SOC_SDMMC_HOST_SUPPORTED
   if (fs == &SD_MMC)
   {
     return SD_MMC.usedBytes();
   }
+#endif  
   else if (fs == &SD)
   {
     return SD.usedBytes();
