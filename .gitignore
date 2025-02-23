@@ -10,4 +10,5 @@ notizen.txt
 *.cmd
 .vscode
 makeESPFMfGKdeflate
+examplesCopy
 !postbuild.cmd

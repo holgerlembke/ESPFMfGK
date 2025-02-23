@@ -437,6 +437,7 @@ int ESPFMfGK::getFileSystemIndex(bool uselastFileSystemIndex)
 */
 
 //*****************************************************************************************************
+// flat view
 void ESPFMfGK::recurseFolderList(String foldername, int maxtiefe, int tiefe)
 {
   int fsi = getFileSystemIndex(false);
@@ -448,28 +449,36 @@ void ESPFMfGK::recurseFolderList(String foldername, int maxtiefe, int tiefe)
   {
     if (file.isDirectory())
     {
-      if (!(String(file.path()).startsWith(svi)))
+      uint32_t flags = ~0;
+      // Show this folder?
+      if (checkFileFlags != NULL)
       {
-        /** /
-        Serial.print("Pfad: ");
-        Serial.println(String(file.path()));
-        Serial.print("Name: ");
-        Serial.println(String(file.name()));
-        /**/
-        uint32_t flags = ~0;
-        if (checkFileFlags != NULL)
-        {
-          flags = checkFileFlags(*fsinfo[fsi].filesystem, String(file.path()) + "/", 0);
-        }
-        if (!(flags & ESPFMfGK::flagIsNotVisible))
-        {
-          fileManager->sendContent(String(tiefe) + ":" + DeUmlautFilename(String(file.path())));
-          fileManager->sendContent(itemtrenner); // 0
-        }
+        flags = checkFileFlags(*fsinfo[fsi].filesystem, String(file.path()) + "/", flagCheckIsPathname);
       }
-      if (tiefe < maxtiefe)
+      if (!(flags & ESPFMfGK::flagIsNotVisible))
       {
-        recurseFolderList(file.path(), maxtiefe, tiefe + 1);
+        if (!(String(file.path()).startsWith(svi)))
+        {
+          /** /
+          Serial.print("Pfad: ");
+          Serial.println(String(file.path()));
+          Serial.print("Name: ");
+          Serial.println(String(file.name()));
+          /**/
+          if (checkFileFlags != NULL)
+          {
+            flags = checkFileFlags(*fsinfo[fsi].filesystem, String(file.path()) + "/", flagCheckIsPathname);
+          }
+          if (!(flags & ESPFMfGK::flagIsNotVisible))
+          {
+            fileManager->sendContent(String(tiefe) + ":" + DeUmlautFilename(String(file.path())));
+            fileManager->sendContent(itemtrenner); // 0
+          }
+        }
+        if (tiefe < maxtiefe)
+        {
+          recurseFolderList(file.path(), maxtiefe, tiefe + 1);
+        }
       }
     }
     file = root.openNextFile();
@@ -550,9 +559,16 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
   {
     if (file.isDirectory())
     {
-      if (flatview)
+      uint32_t flags = ~0;
+      if (checkFileFlags != NULL)
       {
-        recurseFolder(file.path(), flatview, maxtiefe, false, linecounter);
+        flags = checkFileFlags(*fsinfo[fsi].filesystem, String(file.path()) + "/", flagCheckIsPathname);
+      }
+      if (!(flags & ESPFMfGK::flagIsNotVisible)) {
+        if (flatview)
+        {
+          recurseFolder(file.path(), flatview, maxtiefe, false, linecounter);
+        }
       }
     }
     else
@@ -569,7 +585,7 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
         uint32_t flags = ~0;
         if (checkFileFlags != NULL)
         {
-          flags = checkFileFlags(*fsinfo[fsi].filesystem, file.name(), 0);
+          flags = checkFileFlags(*fsinfo[fsi].filesystem, file.name(), flagCheckIsFilename);
         }
         if (!gzipperexists)
         {

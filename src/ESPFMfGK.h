@@ -15,6 +15,10 @@ das funktioniert nicht, weil der / nicht mitgeliefert wird. wie sieht das
     return ESPFMfGK::flagIsNotVisible;
   }
 
+schön wäre eine Funktion wie...
+if (Pathname.startsWith("/.")) ... 
+...um die entsprechenden Ordner ebenfalls auszublenden?!  
+
   Hi, thanks for your great work.
 I have a few suggestions:
 
@@ -31,7 +35,12 @@ tab im editor zum echten tab umwandeln.
 
 
   Changes
-    V2.0.7
+   V2.0.8
+    + fixed some stuff around displaying/not displaying files+folders,
+      adding two flags flagCheckIsFilename and flagCheckIsPathname 
+     + Arduino-release V2.0.14
+
+   V2.0.7
      + Fix: another checkFileFlags() error...
      + add "SOC_SDMMC_HOST_SUPPORTED" for devices without this support
      + Arduino-release V2.0.13
@@ -170,6 +179,10 @@ public:
   const static uint32_t flagIsValidAction =  1 << 10;
   // allowed to create new files
   const static uint32_t flagCanCreateNew =  1 << 11;
+
+  //checking call is for a filename/pathname  
+  const static uint32_t flagCheckIsFilename =  1 << 12;
+  const static uint32_t flagCheckIsPathname =  1 << 13;
 
   ESPxWebCallbackFlags_t checkFileFlags = NULL;
   ESPxWebCallbackURL_t checkURLs = NULL;
