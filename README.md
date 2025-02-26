@@ -17,6 +17,16 @@ ESPFMfGK is the successor of Award Winning https://github.com/holgerlembke/ESPxW
 
 It has a one-the-device file editor. And a persistent preview function.
 
+# Features
+
+* handles all file systems (FFAT, SD, SD_MMC, LittleFS, SPIFFS), all together
+* flat view (all files in one go) or folder view
+* upload files via drag and drop
+* download, delete, rename, create new file
+* included image preview and text editor
+* authentication
+* snap in coding style (just copy one file, it has all the code)
+
 # File menu functions
 
 ### Download
@@ -47,7 +57,7 @@ Permanent editor windows! Just open a file in a windowed editor, change content,
 
 ### Preview
 
-Opens a preview window for the file. It depends on what the browser can display, so everything editable and JPEG/PNG files should work. The windows existance is disconnected from the files existance, it is a snapshot.
+Opens a preview window for the file. It depends on what the browser can display, so everything editable and JPEG/PNG files should work. The windows existence is disconnected from the files existence, it is a snapshot.
 
 ### Download all files
 
@@ -65,7 +75,7 @@ Defines are used to configure some basic features of ESPFMfGK.
 
 ## define fileManagerServerStaticsInternally
 
-By design concept ESPFMfGK is inteded as "drop it in and that is it" solution. To archive that it includes 
+By design concept ESPFMfGK is intended as "drop it in and that is it" solution. To archive that it includes 
 its own html/css/javascript files. They are stored in code space and eat something around 35k.
 
 If you want to reduce the code footprint, undefine that define and put the files from "filemanager" folder into the first added filesystem. No free lunch, either code space or file system.

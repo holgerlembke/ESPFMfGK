@@ -7,38 +7,45 @@
     https://github.com/holgerlembke/ESPFMfGK
     lembke@gmail.com
 
-das funktioniert nicht, weil der / nicht mitgeliefert wird. wie sieht das 
-überhaupt mit den filename + pfad aus?
-  // this will hide system files (in my world, system files start with a dot)
-  if (filename.startsWith("/.")) {
-    // no other flags, file is invisible and nothing allowed
-    return ESPFMfGK::flagIsNotVisible;
-  }
 
-schön wäre eine Funktion wie...
-if (Pathname.startsWith("/.")) ... 
-...um die entsprechenden Ordner ebenfalls auszublenden?!  
-
-  Hi, thanks for your great work.
-I have a few suggestions:
+  ideas <del>junkyard</del>breeding ground
+    das funktioniert nicht, weil der / nicht mitgeliefert wird. wie sieht das 
+    überhaupt mit den filename + pfad aus?
+      // this will hide system files (in my world, system files start with a dot)
+      if (filename.startsWith("/.")) {
+        // no other flags, file is invisible and nothing allowed
+        return ESPFMfGK::flagIsNotVisible;
+      }
 
     add a button to erase all files
     add an HEX editor
 
+    recursive delete folder: https://github.com/holgerlembke/ESPFMfGK/issues/20
+      I can not wait to have delete directory available.
+      ... A function in the sketch gets the input and deletes recursively anything under the directory and then the directory itself. 
 
-wenn es nur ein fs gibt, keine kombobox erzeugen  
-
-
-symbol,, um filecontent zu aktualisieren
-
-tab im editor zum echten tab umwandeln.
+    wenn es nur ein fs gibt, keine kombobox erzeugen  
+    symbol, um filecontent zu aktualisieren
+    tab im editor zum echten tab umwandeln.
 
 
   Changes
+   V2.0.15
+    + skip to .15 (to sync with Arduino release number)
+    + added authentication 
+      (inspired by https://github.com/holgerlembke/ESPFMfGK/issues/14#issuecomment-2661715320)
+    + fixed #endif in totalBytes() & usedBytes   
+      (https://github.com/holgerlembke/ESPFMfGK/issues/20)
+    + fixed getCleanFilename() (it ate last two characters) and fixed rename/move problems
+      (https://github.com/holgerlembke/ESPFMfGK/issues/17)
+    + added FileDateDisplay to display file date (ok, the last write date. remember to set configTzTime())
+      (https://github.com/holgerlembke/ESPFMfGK/issues/7)
+
    V2.0.8
     + fixed some stuff around displaying/not displaying files+folders,
-      adding two flags flagCheckIsFilename and flagCheckIsPathname 
-     + Arduino-release V2.0.14
+      adding two flags flagCheckIsFilename and flagCheckIsPathname
+      (https://github.com/holgerlembke/ESPFMfGK/issues/16) 
+   + Arduino-release V2.0.14
 
    V2.0.7
      + Fix: another checkFileFlags() error...
@@ -216,6 +223,7 @@ private:
   void fileManagerJS(void);
   void fileManagerCSS(void);
   void fileManagerGetBackGround(void);
+  bool fileManagerAuthCall();
 
   // javascript xmlhttp includes
   String colorline(int i);
@@ -283,6 +291,9 @@ public:
   int FileSystemIndexForWebPages = 0;
   bool isFileManagerInternalFile(String fn);
 
+  // modes for file date display
+  enum FileDateDisplay_t { fddNone = 0, fddTitle = 1, fddText = 2};
+
   // must be a valid css color name, see https://en.wikipedia.org/wiki/Web_colors
   String BackgroundColor = "";
   // additional html inserted into the foot below the web page
@@ -292,6 +303,11 @@ public:
   String textareaCharset = "";
   // add this html-files as windowed item, can be list ;-separated
   String HtmlIncludes = "";
+  // authentication
+  String HttpUsername = "";
+  String HttpPassword = "";
+  // set file date display, file date is displayed in localtime, any1 wants UTC option?
+  FileDateDisplay_t FileDateDisplay = fddTitle;
 };
 
 #endif

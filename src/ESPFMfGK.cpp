@@ -184,8 +184,22 @@ bool ESPFMfGK::isFileManagerInternalFile(String fn)
 
 //*****************************************************************************************************
 //*****************************************************************************************************
+bool ESPFMfGK::fileManagerAuthCall() {
+  if ((HttpUsername!="") && (!fileManager->authenticate(HttpUsername.c_str(), HttpPassword.c_str()))) {
+    fileManager->requestAuthentication();
+    return true; 
+  }
+  return false;
+}
+
+//*****************************************************************************************************
+//*****************************************************************************************************
 void ESPFMfGK::fileManagerNotFound(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+
   String uri = fileManager->uri();
 
 #ifdef fileManagerServerStaticsInternallyDeflate
@@ -318,6 +332,10 @@ String ESPFMfGK::dispFileString(uint64_t fs, bool printorg)
 //*****************************************************************************************************
 void ESPFMfGK::fileManagerIndexpage(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+  
   fileManager->send(200, F("text/html"), FPSTR(ESPFMfGKWpindexpage));
 }
 
@@ -594,17 +612,35 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
 
         if (!(flags & ESPFMfGK::flagIsNotVisible))
         {
-          String cache = String(file.path());
+          String cache = String(file.path());                  // 0
           cache += itemtrenner;
-          cache += DeUmlautFilename(String(file.path()));
+          cache += DeUmlautFilename(String(file.path()));      // 1
           cache += itemtrenner;
-          cache += dispFileString(file.size(), false);
+          cache += dispFileString(file.size(), false);         // 2
           cache += itemtrenner;
-          cache += colorline(linecounter);
+          cache += colorline(linecounter);                     // 3
           cache += itemtrenner;
-          cache += String(flags);
+          cache += String(flags);                              // 4
+          cache += itemtrenner;
+
+          time_t fd = 0;
+          if (FileDateDisplay != fddNone) {
+            fd = file.getLastWrite() * 10 + (int)FileDateDisplay;
+          }
+          cache += String(fd);                                 // 5
           cache += itemtrenner;
           fileManager->sendContent(cache);
+
+          /*
+          coming soon...
+          file.getLastWrite();
+          struct tm *tmstruct = localtime(&t);
+          Serial.printf(
+            "  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour,
+            tmstruct->tm_min, tmstruct->tm_sec
+          );
+          */
+    
 
           /** /
           fileManager->sendContent(String(file.path()));                   // .path() ist fqfn, .name() nur fn?
@@ -844,7 +880,10 @@ int ESPFMfGK::getFSidxfromFilename(String fn)
   int i = fn.indexOf(":");
   if (i > -1)
   {
-    fn = fn.substring(0, i - 1);
+    fn = fn.substring(0, i);
+    if (fn.startsWith("/")) {
+      fn.remove(0,1);
+    }
     int fnidx = fn.toInt();
     // Limits
     if ((fnidx < 0) || (fnidx >= maxfilesystem))
@@ -868,7 +907,7 @@ String ESPFMfGK::getCleanFilename(String fn)
   int i = fn.indexOf(":");
   if (i > -1)
   {
-    return fn.substring(i + 1, fn.length() - 2);
+    return fn.substring(i + 1, fn.length()); // from to
   }
   else
   {
@@ -879,6 +918,12 @@ String ESPFMfGK::getCleanFilename(String fn)
 //*****************************************************************************************************
 bool ESPFMfGK::CopyMoveFile(String oldfilename, String newfilename, bool move)
 {
+  /** /
+  Serial.println("ofn1: "+oldfilename);
+  Serial.println("nfn1: "+newfilename);
+  Serial.println("move: "+String(move));
+  /**/
+
   // Zusammensuchen der FilesystemIndizes
   int fsiofn = getFSidxfromFilename(oldfilename);
   int fsinfn = getFSidxfromFilename(newfilename);
@@ -896,6 +941,11 @@ bool ESPFMfGK::CopyMoveFile(String oldfilename, String newfilename, bool move)
   oldfilename = getCleanFilename(oldfilename);
   newfilename = getCleanFilename(newfilename);
 
+  /** /
+  Serial.println("ofn2: "+oldfilename);
+  Serial.println("nfn2: "+newfilename);
+  /**/
+
   // Neuen Ordner bauen, vorsichtshalber. Stückweise.
   int i = 1;
   String pn = pathname(newfilename);
@@ -908,6 +958,19 @@ bool ESPFMfGK::CopyMoveFile(String oldfilename, String newfilename, bool move)
     i++;
   }
   fsinfo[fsinfn].filesystem->mkdir(pn);
+
+  /** /
+  Serial.println("ofn3: "+oldfilename);
+  Serial.println("ofn3 fs: "+fsinfo[fsiofn].fsname);
+  Serial.println("nfn3: "+newfilename);
+  Serial.println("nfn3 fs: "+fsinfo[fsinfn].fsname);
+  /**/
+
+  // Upsi.
+  if ((fsinfn==fsiofn) && (newfilename==oldfilename)) {
+    Serial.println(F("CMF: newfile==oldfile, fail."));
+    return false;
+  }
 
   File oldfile = fsinfo[fsiofn].filesystem->open(oldfilename, FILE_READ);
   File newfile = fsinfo[fsinfn].filesystem->open(newfilename, FILE_WRITE);
@@ -997,7 +1060,8 @@ void ESPFMfGK::fileManagerJobber(void)
         Illegal404();
         return;
       }
-      if (!newfn.startsWith("/"))
+      // kein Pfad am Anfang und kein Filesystem-Kenner
+      if ((!newfn.startsWith("/")) && (newfn.indexOf(":")==-1))
       {
         newfn = "/" + newfn;
       }
@@ -1261,7 +1325,7 @@ void ESPFMfGK::fileManagerReceiverOK(void)
 void ESPFMfGK::fileManagerReceiver(void)
 {
   HTTPUpload &upload = fileManager->upload();
-  Serial.println("Server upload Status: " + String(upload.status));
+  // Serial.println("Server upload Status: " + String(upload.status));
 
   if (upload.status == UPLOAD_FILE_START)
   {
@@ -1343,8 +1407,10 @@ void ESPFMfGK::fileManagerReceiver(void)
       fsUploadFile.close();
       // fsUploadFile = NULL;
     }
+    /** /
     Serial.print("handleFileUpload Size: ");
     Serial.println(upload.totalSize);
+    /**/
   }
 }
 
@@ -1396,9 +1462,9 @@ uint64_t ESPFMfGK::totalBytes(fs::FS *fs)
   if (fs == &SD_MMC)
   {
     return SD_MMC.totalBytes();
-  }
+  } else 
 #endif  
-  else if (fs == &SD)
+  if (fs == &SD)
   {
     return SD.totalBytes();
   }
@@ -1423,9 +1489,9 @@ uint64_t ESPFMfGK::usedBytes(fs::FS *fs)
   if (fs == &SD_MMC)
   {
     return SD_MMC.usedBytes();
-  }
+  } else 
 #endif  
-  else if (fs == &SD)
+  if (fs == &SD)
   {
     return SD.usedBytes();
   }

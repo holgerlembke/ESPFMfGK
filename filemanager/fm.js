@@ -1,27 +1,30 @@
-var elemento2i1 = null;
-var elemento3 = null;
-var elementmsg = null;
-var elementfi = null;
-var elementei = null;
-var elementpv = null;
-var elementti = null;
-var elementpi = null;
-var elementws = null;
+"use strict";
+
+// slowly moving from "var" to "let"
+
+let elemento2i1 = null;
+let elemento3 = null;
+let elementmsg = null;
+let elementfi = null;
+let elementei = null;
+let elementpv = null;
+let elementti = null;
+let elementpi = null;
+let elementws = null;
+let elementwinform = null;
 
 // globale Dialogroutinen
-var dialog = null;
-var dialogOKCall = null;
-
-// wirklich mal auf let umstellen!!
+let dialog = null;
+let dialogOKCall = null;
 
 const sektionstrenner = String.fromCharCode(3, 1, 2);
 const antworttrenner = String.fromCharCode(2, 1, 3);
 const itemtrenner = String.fromCharCode(2, 1, 4);
 const bootinfotrenner = String.fromCharCode(2, 1, 7);
 
-var foldername = "";
-var windowcounter = 0;
-var filesysteminfos = "";
+let foldername = "";
+let windowcounter = 0;
+let filesysteminfos = "";
 
 const pathinsertintro =
     "<div id=\"pl\"><div class=\"po1\"></div><div class=\"po2\"><div></div></div><div class=\"po3\"></div><div class=\"po4\"><div>";
@@ -52,11 +55,11 @@ const windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">
     "<div class=\"windowgrip\">:::</div></div>";
 
 
-// OUTLINE: Callbacks für die HTMLIncludes, um die Aktionen mitzubekommen.
-var callbackFileinsert = [];
+// Callbacks für die HTMLIncludes
+let callbackFileinsert = [];
 
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function compressurlfile(source) {
     // dynamic post load js    
     var se = document.createElement('script');
@@ -119,7 +122,7 @@ function compressurlfile(source) {
     request.send(null);
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function getFileSystemIndex() {
     var selectinput = document.getElementById('memory');
     if (selectinput == null) {
@@ -130,7 +133,7 @@ function getFileSystemIndex() {
     }
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function executecommand(command) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -143,13 +146,13 @@ function executecommand(command) {
     xhr.send(null);
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function showfolder(level, folder) {
     foldername = folder;
     getfileinsert();
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function progressfunc(evt) {
     /*        
           var percentComplete = Math.round((evt.loaded / evt.total) * 100.0);
@@ -159,7 +162,7 @@ function progressfunc(evt) {
     msgline("Fetching data: " + evt.loaded + "  B");
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function getfileinsert() {
     var param = getFileSystemIndex();
     var cb = document.getElementById("treeview");
@@ -201,7 +204,7 @@ function AnswerProcessor() {
         var fullpath = "";
         var items = sections[0].split(itemtrenner);
         if ((items.length > 0) && (items[0] != "")) {
-            haspathtop = true;
+            let haspathtop = true;
             fullpath = "/";
             var c = 0;
             var p = "";
@@ -312,11 +315,37 @@ function AnswerProcessor() {
             } else {
                 s = s.replaceAll("%fd", items[c + 1]);
             }
-            s = s.replaceAll("%fn", items[c + 0]);
-            s = s.replaceAll("%fs", items[c + 2]);
-            s = s.replaceAll("%cc", items[c + 3]);
 
-            c += 5;
+            // Filedate & Filesize zusammenbauen
+            let fds = "";
+            if (items.length >= 6) {
+              let fdi = parseInt(items[c + 5]);
+              switch (fdi % 10) {
+                case 0 : {
+                  fds = items[c + 2];
+                  break;
+                }
+                case 1 : { // title
+                  let filedate = new Date(fdi*100); 
+                  fds = "<span title='" + filedate.toLocaleString() + "'>" + items[c + 2] + "</spnn>";
+                  break;
+                }
+                case 2 : { // text
+                  let filedate = new Date(fdi*100); 
+                  fds = items[c + 2] + "&nbsp" + filedate.toLocaleString();
+                  break;
+                }
+              }
+            } else {
+              fds = items[c + 2];
+            }
+
+            s = s.replaceAll("%fn", items[c + 0]);
+            s = s.replaceAll("%fs", fds);
+            s = s.replaceAll("%cc", items[c + 3]);
+            
+            // weiterzählen
+            c += 6;
             itemhtml += s;
         }
 
@@ -327,14 +356,13 @@ function AnswerProcessor() {
         msgline("");
         waitspinner(false);
 
-
         for (let i = 0; i < callbackFileinsert.length; i++) {
-          //callbackFileinsert[i]();
+          callbackFileinsert[i]();
         }
     }
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function getbootinfo() {
     msgline("Get display infos...");
     var request = new XMLHttpRequest();
@@ -344,7 +372,7 @@ function getbootinfo() {
     request.send(null);
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function BootAnswerProcessor() {
     var DONE = this.DONE || 4;
     if (this.readyState === DONE) {
@@ -355,7 +383,7 @@ function BootAnswerProcessor() {
         // ESPxWebFlMgr2::Backgroundcolor
         if ((res.length >= 1) && (res[0] != "")) {
             var c = document.getElementsByClassName('background');
-            for (i = 0; i < c.length; i++) {
+            for (let i = 0; i < c.length; i++) {
                 c[i].style.backgroundColor = res[0];
             }
         }
@@ -384,27 +412,38 @@ function BootAnswerProcessor() {
     }
 }
 
-//000000000000000000000000000
+let linksverschiebung = 0;
+
+//------------------------------------------------------------------------------------------------------------
+function linksverschieber(node) {
+  // Fensterposition
+  node.style.top = 100 + linksverschiebung + "px";
+  node.style.left = 100 + linksverschiebung + "px";
+  linksverschiebung += 20;
+}
+
+//------------------------------------------------------------------------------------------------------------
 function LoadHtmlIncludesProcessor() {
-    var DONE = this.DONE || 4;
+    const DONE = this.DONE || 4;
     if (this.readyState === DONE) {
-        var res = this.responseText;
+        let res = this.responseText;
 
         // First comment has to be <!--XXXXX--> with xxxx the unique windows id
-        var st = res.search("<!--");
-        var en = res.search("-->");
+        const st = res.search("<!--");
+        const en = res.search("-->");
         if ((st>=0) && (en>st)) {
-            var id = res.substring(st+4,en).trim();
+            let id = res.substring(st+4,en).trim();
 
-            var elem = document.createRange().createContextualFragment(res);
+            let elem = document.createRange().createContextualFragment(res);
             document.body.appendChild(elem);
             // alles async, also warten, bis browser soweit ist.  
-            var script = document.getElementById(id+".scr");
+            let script = document.getElementById(id+".scr");
             script.addEventListener('load', function() {
-                var node = document.getElementById(id);
+                let node = document.getElementById(id);
                 if (node) {
                     makeDraggable(node);
                 }
+                linksverschieber(node);
                 // aufruf der startfunktion
                 window[id]();
             });
@@ -412,14 +451,14 @@ function LoadHtmlIncludesProcessor() {
     }
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function LoadHtmlIncludes(includelist) {
     waitspinner(true);
 
-    var includes = includelist.split(";");
+    let includes = includelist.split(";");
 
     includes.forEach(function (incl) {
-        var includexhr = new XMLHttpRequest();
+        let includexhr = new XMLHttpRequest();
         includexhr.onreadystatechange = LoadHtmlIncludesProcessor;
 
         includexhr.open('GET', incl, true);
@@ -427,24 +466,24 @@ function LoadHtmlIncludes(includelist) {
     });
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function fsselectonchange() {
     foldername = "";
     getfileinsert();
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function downloadfile(filename) {
     window.location.href = "/job?fs=" + getFileSystemIndex() + "&job=download&fn=" + filename;
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function makeemptyfile(filename) {
     msgline("Please wait. Create new empty file...");
     executecommand("job=createnew&fn=" + foldername + "/newfile");
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function previewfile(filename) {
     msgline("Please wait. Creating preview...");
 
@@ -467,7 +506,8 @@ function previewfile(filename) {
             var content = document.querySelector("#" + winid + " .windowcontent");
             // var dragger = document.querySelector("#" + winid + " .windowtitle");
             var winid = '#' + "win" + windowcounter;
-            var node = document.querySelector(winid);
+            let node = document.querySelector(winid);
+            linksverschieber(node); 
 
             if (previewxhr.getResponseHeader('content-type').startsWith("image/")) {
                 var image = new Image();
@@ -496,43 +536,130 @@ function previewfile(filename) {
     waitspinner(true);
 }
 
-//000000000000000000000000000
+const zeilennummernopenstyle = "0px 5px";
+
+//------------------------------------------------------------------------------------------------------------
+function showzeilennummernimeditor(event) {
+  let winid = event.target.getAttribute("winid");
+  let znr = document.querySelector(winid + " .line-numbers");
+  if (znr.style.padding == zeilennummernopenstyle) {
+    znr.style.padding = "0";
+    znr.style.display = "none";
+  } else {
+    znr.style.padding = zeilennummernopenstyle;
+    znr.style.display = "inline-block";
+    //znr.style.position = "absolute";
+
+    let textareahtml = document.querySelector(winid + " textarea");
+    zeilennummernreintun(textareahtml);
+  }
+}
+
+//------------------------------------------------------------------------------------------------------------
+function zeilennummernreintun(textareahtml) {
+  let winid = textareahtml.getAttribute("winid");
+  let znr = document.querySelector(winid + " .line-numbers");
+
+  if (znr.style.padding == zeilennummernopenstyle) {
+    let lastlln = textareahtml.getAttribute("lln");
+    if (lastlln == null) {
+      lastlln = 0;
+    }
+
+    lastlln = parseInt(lastlln);
+    let linec = (String(textareahtml.value).match(/\n/g) || '').length + 1;
+
+    if (lastlln!=linec) {
+      textareahtml.setAttribute("lln",linec);
+      let content = document.querySelector(winid + ' .windowcontent');
+      znr.style.height = content.style.height;
+      let s = "";
+      for (let i = 1; i <= linec; i++) {
+        s += "<span>" + i + "</span>" + "<br>";
+      }
+      znr.innerHTML = s;
+    }
+  }
+}
+
+//------------------------------------------------------------------------------------------------------------
+function textareascrollsync(textareahtml) {
+  let winid = textareahtml.getAttribute("winid");
+  let znr = document.querySelector(winid + " .line-numbers");
+
+  if (znr.style.padding == zeilennummernopenstyle) {
+    znr.scrollTop = textareahtml.scrollTop;
+  }
+}
+
+//------------------------------------------------------------------------------------------------------------
+function zeilennummernevent(event) {
+  zeilennummernreintun(event.target);
+}
+
+//------------------------------------------------------------------------------------------------------------
+function textareascroll(event) {
+  textareascrollsync(event.target);
+}
+
+//------------------------------------------------------------------------------------------------------------
 function editfile(filename) {
     msgline("Please wait. Creating editor...");
 
-    var editxhr = new XMLHttpRequest();
+    let editxhr = new XMLHttpRequest();
     editxhr.onreadystatechange = function() {
-        var DONE = this.DONE || 4;
+        let DONE = this.DONE || 4;
         if (this.readyState === DONE) {
-            var newwin = windowhtml;
+            let newwin = windowhtml;
 
-            var winid = "win" + windowcounter;
+            let winid = "win" + windowcounter;
             newwin = newwin.replaceAll("%i%", "win" + windowcounter);
             newwin = newwin.replaceAll("%t%", filename);
-            var elem = document.createRange().createContextualFragment(newwin);
-            document.body.appendChild(elem);
+            let elem = document.createRange().createContextualFragment(newwin);
+            let appnode = document.body.appendChild(elem);
 
-            var winid = '#' + "win" + windowcounter;
+            winid = '#' + "win" + windowcounter;
 
-            var content = document.querySelector(winid + " .windowcontent");
-            var node = document.querySelector(winid);
-            document.querySelector(".windowgrip").style.display="none";
+            let content = document.querySelector(winid + " .windowcontent");
+            let node = document.querySelector(winid);
+            linksverschieber(node);
+            document.querySelector(".windowgrip").style.display = "none";
 
-            content.outerHTML = this.responseText;
+            content.outerHTML = this.responseText; // textarea comes here
 
-            var save = document.querySelector(winid + " .ts");
-            save.style.display = "block";
-            save.addEventListener('click', () => {
+            let titlebuttons = document.querySelectorAll(winid + " .ts");
+            titlebuttons.forEach((item) => {
+              item.style.display = "block";
+            });
+
+            // winid für editor merken
+            let editortag = document.querySelector(winid + " .idL");
+            editortag.setAttribute("winid", winid);
+
+            let zeilennummernbutton = document.querySelector(winid + " .idL");
+            zeilennummernbutton.addEventListener('click', showzeilennummernimeditor);            
+
+            let textareahtml = document.querySelector(winid + " textarea");
+            textareahtml.addEventListener('keyup',zeilennummernevent);
+            textareahtml.setAttribute("winid", winid);
+            zeilennummernreintun(textareahtml);
+
+            textareahtml.addEventListener("scroll",textareascroll);
+            
+            let savebutton = document.querySelector(winid + " .idS");
+            savebutton.setAttribute("winid", winid);
+//irgendwann in funktion auslagern, damit hotkeys daran geknotet werden können
+            savebutton.addEventListener('click', () => {
                 content = document.querySelector(winid + " textarea").value;
 
-                var xhr = new XMLHttpRequest();
+                let xhr = new XMLHttpRequest();
 
                 xhr.open('POST', '/r?fs=' + getFileSystemIndex() + '&fn=' + filename);
 
-                var boundary = '-----whatever';
+                let boundary = '-----whatever';
                 xhr.setRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
 
-                var body = "" +
+                let body = "" +
                     '--' + boundary + '\r\n' +
                     'Content-Disposition: form-data; name="uploadfile"; filename="' + filename + '"' + '\r\n' +
                     'Content-Type: text/plain' + '\r\n' +
@@ -567,10 +694,10 @@ function editfile(filename) {
     waitspinner(true);
 }
 
-var uploaddone = true; // hlpr for multiple file uploads
-var lastpercentComplete = -1;
+let uploaddone = true; // hlpr for multiple file uploads
+let lastpercentComplete = -1;
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function uploadFile(file, islast) {
     uploaddone = false;
     var xhr = new XMLHttpRequest();
@@ -595,11 +722,11 @@ function uploadFile(file, islast) {
     xhr.send(formdata);
 }
 
-var globaldropfilelisthlpr = null; // read-only-list, no shift()
-var transferitem = 0;
-var uploadFileProzessorhndlr = null;
+let globaldropfilelisthlpr = null; // read-only-list, no shift()
+let transferitem = 0;
+let uploadFileProzessorhndlr = null;
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function uploadFileProzessor() {
     if (uploaddone) {
         if (transferitem == globaldropfilelisthlpr.length) {
@@ -614,7 +741,7 @@ function uploadFileProzessor() {
     }
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function dropHandler(ev) {
     waitspinner(true);
     console.log('File(s) dropped');
@@ -640,7 +767,7 @@ function dropHandler(ev) {
     }
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function dragOverHandler(ev) {
     console.log('File(s) in drop zone');
 
@@ -648,7 +775,7 @@ function dragOverHandler(ev) {
     ev.preventDefault();
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function waitspinner(ison) {
     if (ison) {
         elementws.unpauseAnimations();
@@ -659,12 +786,12 @@ function waitspinner(ison) {
     }
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function msgline(msg) {
     elementmsg.innerHTML = msg;
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function makeDraggable(box) {
     let cX = 0,
         cY = 0,
@@ -677,6 +804,9 @@ function makeDraggable(box) {
     if (content) {
         if (content.clientHeight > window.innerHeight) {
             content.style.height = window.innerHeight / 2 + "px";
+        } else {
+            // content.style.height = content.offsetHeight + "px";
+            content.style.height = "100px";
         }
         if (content.clientWidth > window.innerWidth) {
             content.style.width = window.innerWidth / 2 + "px";
@@ -775,56 +905,53 @@ function makeDraggable(box) {
     }
 }
 
-//000000000000000000000000000
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function deletefile(filename) {
     var fri = filedeleteinsert;
     fri = fri.replaceAll("%f%", filename);
     showdialog(deletefileinit, deletefileanalyzer, fri, "Delete file", filename);
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function deletefileinit(formdata) {
     document.getElementById("filename").value = formdata;
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function deletefileanalyzer(formdata) {
-    var filename = document.getElementById("filename").value;
+    let filename = document.getElementById("filename").value;
 
     msgline("Please wait. Delete in progress...");
     executecommand("job=del&fn=" + filename);
 }
 
-//000000000000000000000000000
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function renamefile(filename) {
-    var fri = filerenameinsert;
+    let fri = filerenameinsert;
     fri = fri.replaceAll("%f%", filesysteminfos);
     showdialog(renamefileinit, renamefileanalyzer, fri, "Rename/Move file", filename);
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function renamefileinit(formdata) {
     document.getElementById("newname").value = formdata;
     document.getElementById("oldname").value = formdata;
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function renamefileanalyzer(formdata) {
-    var newname = document.getElementById("newname").value;
-    var oldname = document.getElementById("oldname").value;
+    let newname = document.getElementById("newname").value;
+    let oldname = document.getElementById("oldname").value;
 
     msgline("Please wait. Rename in progress...");
     executecommand("job=ren&fn=" + oldname + "&new=" + newname);
 }
 
-//000000000000000000000000000
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function downloadmgrresanalyzer() {
-    var radios = document.getElementsByTagName('input');
-    var value = 0;
-    for (var i = 0; i < radios.length; i++) {
+    let radios = document.getElementsByTagName('input');
+    let value = 0;
+    for (let i = 0; i < radios.length; i++) {
         if (radios[i].type === 'radio' && radios[i].checked) {
             value = radios[i].value;
         }
@@ -835,13 +962,12 @@ function downloadmgrresanalyzer() {
     }
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function downloadmgr() {
     showdialog(0, downloadmgrresanalyzer, folderdownloadinsert, "Download files");
 }
 
-//000000000000000000000000000
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function dialogkill() {
     document.getElementById("dok").removeEventListener("click",dialogeventlistenerHndlOK);
     document.getElementById("dcancel").removeEventListener("click",dialogeventlistenerHndlCancel);
@@ -849,9 +975,11 @@ function dialogkill() {
 
     dialog = null;
     dialogOKCall = null;
+
+    elementwinform.innerHTML = "";
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function dialogeventlistenerHndlOK() {
   dialog.close();
   if (dialogOKCall ) {
@@ -860,20 +988,19 @@ function dialogeventlistenerHndlOK() {
   dialogkill();
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function dialogeventlistenerHndlCancel() {
   dialog.close();
   dialogkill();
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function showdialog(initcall, okcall, dialogitems, title, formdata) {
     dialog = document.getElementById("prompt");
-    var result = document.getElementById("result");
+    let result = document.getElementById("result");
 
-    var html = document.getElementById("windowform");
-    html.innerHTML = dialogitems;
-    html = document.getElementById("wt");
+    elementwinform.innerHTML = dialogitems;
+    let html = document.getElementById("wt");
     html.innerHTML = title;
 
     if (initcall) {
@@ -889,7 +1016,7 @@ function showdialog(initcall, okcall, dialogitems, title, formdata) {
     dialog.showModal();
 }
 
-//000000000000000000000000000
+//------------------------------------------------------------------------------------------------------------
 function boot() {
     // Does lookup need time?  
     elemento2i1 = document.getElementById("o2i1");
@@ -901,12 +1028,20 @@ function boot() {
     elementti = document.getElementById("ti");
     elementpi = document.getElementById("pi");
     elementws = document.getElementById("wait");
+    elementwinform = document.getElementById("windowform");
+
+/*
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault();
+    console.log('CTRL + S');
+  }
+});
+*/
 
     getbootinfo();
 }
 
-//->
-// window.onload = boot;
 window.addEventListener("load", boot);
 
 

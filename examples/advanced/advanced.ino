@@ -40,10 +40,10 @@ void setup() {
     delay(10);
   }
 
+  configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org", "");
+
   addFileSystems();
   setupFilemanager();
-
-
 }
 
 void loop() {

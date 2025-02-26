@@ -1,5 +1,7 @@
 // Adds the filé systems
 void addFileSystems(void) {
+  // set configTzTime() in setup() to get valid file dates. Otherwise they are kaputt[tm].
+
   // This adds the Storage into the Filemanager. You have to at least call one of those.
   // If you don't, begin() will fail. Because a Filemanager without files is useless.
 
@@ -112,6 +114,13 @@ void setupFilemanager(void) {
   filemgr.WebPageTitle = "FileManager";
   filemgr.BackgroundColor = "white";
   filemgr.textareaCharset = "accept-charset=\"utf-8\"";
+
+  // If you want authentication
+  // filemgr.HttpUsername = "my";
+  // filemgr.HttpPassword = "secret";
+
+  // display the file date? change here. does not work well if you never set configTzTime()
+  // filemgr.FileDateDisplay = ESPFMfGK::fddNone;
 
   if ((WiFi.status() == WL_CONNECTED) && (filemgr.begin())) {
     Serial.print(F("Open Filemanager with http://"));
