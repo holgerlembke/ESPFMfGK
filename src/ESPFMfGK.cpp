@@ -342,12 +342,20 @@ void ESPFMfGK::fileManagerIndexpage(void)
 //*****************************************************************************************************
 void ESPFMfGK::fileManagerJS(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+
   fileManager->send(200, F("text/javascript"), FPSTR(ESPFMfGKWpjavascript));
 }
 
 //*****************************************************************************************************
 void ESPFMfGK::fileManagerCSS(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+
   fileManager->send(200, F("text/css"), FPSTR(ESPFMfGKWpcss));
 }
 
@@ -665,6 +673,10 @@ void ESPFMfGK::recurseFolder(String foldername, bool flatview, int maxtiefe, boo
 //*****************************************************************************************************
 void ESPFMfGK::fileManagerFileListInsert(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+
   // get the file system. all safe.
   int fsi = getFileSystemIndex();
   bool sit = ShowInTreeView();
@@ -758,6 +770,10 @@ String ESPFMfGK::escapeHTMLcontent(String html)
 //*****************************************************************************************************
 void ESPFMfGK::fileManagerBootinfo(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+
   // hier kann man die globalen Stati initialisieren, weil man weiß, dass die Webseite gerade frisch geladen wird.
   lastFileSystemIndex = -1;
 
@@ -1022,6 +1038,10 @@ bool ESPFMfGK::CopyMoveFile(String oldfilename, String newfilename, bool move)
 // sets the file system, checks the allowance flags and file existance
 void ESPFMfGK::fileManagerJobber(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+
   if (fileManager->args() >= 3)
   { // https://www.youtube.com/watch?v=KSxTxynXiBs
     String jobname = fileManager->arg("job");
@@ -1215,6 +1235,10 @@ void ESPFMfGK::fileManagerJobber(void)
 //*****************************************************************************************************
 void ESPFMfGK::HtmlIncludesInterface(void)
 {
+  if (fileManagerAuthCall()) {
+    return; 
+  }
+
   if (HtmlIncludesCallback)
   {
     if (!HtmlIncludesCallback(fileManager))

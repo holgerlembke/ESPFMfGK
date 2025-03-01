@@ -30,6 +30,9 @@
 
 
   Changes
+   V2.0.16
+    + added authentication into all HTTP_GET calls
+
    V2.0.15
     + skip to .15 (to sync with Arduino release number)
     + added authentication 
