@@ -53,7 +53,7 @@ div {
     white-space: nowrap;
     display: grid;
     grid-auto-rows: 1fr;
-    grid-template-columns: 1fr 20px;
+    grid-template-columns: 1fr 20px 20px;
     gap: 0px 0px;
 }
 
@@ -434,14 +434,6 @@ div {
     border-left: 2px solid #D8A570;
 }
 
-#tect {
-    background-color: white;
-    padding: 2px;
-    white-space: pre;
-    overflow-wrap: normal;
-    overflow-x: scroll;
-}
-
 .windowcontent pre {
     background-color: white;
     display: inline-block;
@@ -452,13 +444,19 @@ div {
     display: grid;
     margin: 0;
     grid-auto-rows: 1fr;
-    grid-template-columns: 1fr auto 2px 20px;
+    grid-template-columns: 1fr auto auto 2px 20px;
     gap: 0px 0px;
 }
 
 .windowtitle .g {
     background-color: white;
     margin: 0;
+}
+
+.windowtitle .p {
+    padding: 2px; 
+    margin:0px;
+    background: #FE9A00;
 }
 
 .windowtitle .t {
@@ -532,3 +530,49 @@ dialog::backdrop {
     border-radius: 2px;
     outline: none;
 }
+
+/* Editor */
+form {
+  background-color: white;
+  border: 1px solid black;
+}
+
+.editor {
+  display: inline-flex;
+  gap: 0px;
+  padding: 0px 0px;
+  background-color: white;
+  margin: 0;
+  font-family: monospace;
+}
+
+.line-numbers {
+  display: none;
+  position: relative;
+  overflow-y: hidden;
+  width: 30px;
+  font: inherit;
+  text-align: right;
+  margin: 0;
+}
+
+.line-numbers span {
+  padding: 1px 0 0 0;
+}
+
+textarea {
+  overflow-y: hidden;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  background-color: white !important;
+}
+
+aaaatect {
+    background-color: white;
+    padding: 2px;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: scroll;
+}
+

@@ -30,7 +30,10 @@
 
 
   Changes
-   V2.0.16
+   V2.0.17
+    + fixing https://github.com/holgerlembke/ESPFMfGK/issues/17#issuecomment-2692343418
+
+    V2.0.16
     + added authentication into all HTTP_GET calls
 
    V2.0.15

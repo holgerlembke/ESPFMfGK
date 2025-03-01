@@ -28,6 +28,7 @@ static const char ESPFMfGKWpindexpage[] PROGMEM = R"==x==(
         <!-- <div class="o2" id="o2">&nbsp;</div> -->
         <div class="o2" id="o2">
             <div id="o2i1">&nbsp;</div>
+            <div id="o2i2" title="Reload file list" onclick="getfileinsert();">&nbsp;&#x27F3;&nbsp;</div>
             <div id="o2i2" title="Create an empty file" onclick="makeemptyfile();">&nbsp;&#xFF0B;&nbsp;</div>
         </div>
         <div class="o3" id="o3">&nbsp;</div>
@@ -99,6 +100,7 @@ static const char ESPFMfGKWpindexpage[] PROGMEM = R"==x==(
 </body>
 
 </html>
+
   )==x==";
 
 static const char ESPFMfGKWpjavascript[] PROGMEM = R"==x==(
@@ -154,11 +156,10 @@ const filedeleteinsert =
     "Delete file <i>%f%</i>?<br><input type=\"hidden\" id=\"filename\"><p><br>Deleting files is final.</p>";
 
 const windowhtml = "<div id=\"%i%\"><div class=\"windowtitle\"><div class=\"t\">%t%</div>" +
-    "<div class=\"tsi\"><div class=\"ts\">Save</div></div>" +
+    "<div class=\"ts idL\" title=\"Show/Hide line numbers\">#</div><div class=\"ts idS\">Save</div>" +
     "<div class=\"g\"></div>" +
     "<div class=\"windowclose\">&nbsp;</div></div><div class=\"windowcontent\"></div>" +
     "<div class=\"windowgrip\">:::</div></div>";
-
 
 // Callbacks für die HTMLIncludes
 let callbackFileinsert = [];
@@ -461,6 +462,7 @@ function AnswerProcessor() {
         msgline("");
         waitspinner(false);
 
+
         for (let i = 0; i < callbackFileinsert.length; i++) {
           callbackFileinsert[i]();
         }
@@ -589,6 +591,11 @@ function makeemptyfile(filename) {
 }
 
 //------------------------------------------------------------------------------------------------------------
+function insertAfter(referenceNode, newNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
+//------------------------------------------------------------------------------------------------------------
 function previewfile(filename) {
     msgline("Please wait. Creating preview...");
 
@@ -613,6 +620,14 @@ function previewfile(filename) {
             var winid = '#' + "win" + windowcounter;
             let node = document.querySelector(winid);
             linksverschieber(node); 
+
+            let spacer = document.querySelector(winid + " .g");
+            let div1 = document.createElement("div");
+            div1.classList.add("p");
+            let div2 = document.createElement("div");
+            div2.classList.add("p");
+            insertAfter(spacer,div1);
+            insertAfter(spacer,div2);
 
             if (previewxhr.getResponseHeader('content-type').startsWith("image/")) {
                 var image = new Image();
@@ -910,8 +925,7 @@ function makeDraggable(box) {
         if (content.clientHeight > window.innerHeight) {
             content.style.height = window.innerHeight / 2 + "px";
         } else {
-            // content.style.height = content.offsetHeight + "px";
-            content.style.height = "100px";
+            content.style.height = content.offsetHeight + "px";
         }
         if (content.clientWidth > window.innerWidth) {
             content.style.width = window.innerWidth / 2 + "px";
@@ -1213,7 +1227,7 @@ div {
     white-space: nowrap;
     display: grid;
     grid-auto-rows: 1fr;
-    grid-template-columns: 1fr 20px;
+    grid-template-columns: 1fr 20px 20px;
     gap: 0px 0px;
 }
 
@@ -1594,14 +1608,6 @@ div {
     border-left: 2px solid #D8A570;
 }
 
-#tect {
-    background-color: white;
-    padding: 2px;
-    white-space: pre;
-    overflow-wrap: normal;
-    overflow-x: scroll;
-}
-
 .windowcontent pre {
     background-color: white;
     display: inline-block;
@@ -1612,13 +1618,19 @@ div {
     display: grid;
     margin: 0;
     grid-auto-rows: 1fr;
-    grid-template-columns: 1fr auto 2px 20px;
+    grid-template-columns: 1fr auto auto 2px 20px;
     gap: 0px 0px;
 }
 
 .windowtitle .g {
     background-color: white;
     margin: 0;
+}
+
+.windowtitle .p {
+    padding: 2px; 
+    margin:0px;
+    background: #FE9A00;
 }
 
 .windowtitle .t {
@@ -1692,6 +1704,52 @@ dialog::backdrop {
     border-radius: 2px;
     outline: none;
 }
+
+/* Editor */
+form {
+  background-color: white;
+  border: 1px solid black;
+}
+
+.editor {
+  display: inline-flex;
+  gap: 0px;
+  padding: 0px 0px;
+  background-color: white;
+  margin: 0;
+  font-family: monospace;
+}
+
+.line-numbers {
+  display: none;
+  position: relative;
+  overflow-y: hidden;
+  width: 30px;
+  font: inherit;
+  text-align: right;
+  margin: 0;
+}
+
+.line-numbers span {
+  padding: 1px 0 0 0;
+}
+
+textarea {
+  overflow-y: hidden;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  background-color: white !important;
+}
+
+aaaatect {
+    background-color: white;
+    padding: 2px;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: scroll;
+}
+
   )==g==";
 
 
